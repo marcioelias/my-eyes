@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  # Nothing is published before the full suite passes on every supported
+  # version — a tag must not be able to skip CI.
+  verify:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Publish
+    needs: verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check the tag matches the package version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./packages/core/package.json').version")"
+
+          if [ "$TAG" != "$PKG" ]; then
+            echo "Tag $TAG does not match @my-eyes/core version $PKG." >&2
+            echo "Bump packages/core/package.json before tagging." >&2
+            exit 1
+          fi
+
+      - name: Build the distributed files
+        run: npm run build --workspaces --if-present
+
+      - name: Publish @my-eyes/core
+        run: npm publish --provenance --access public
+        working-directory: packages/core
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Validate the Composer package
+        run: composer validate --strict
+
+      - name: Create the GitHub release
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  # Packagist releases from the tag itself — composer.json lives at the repo
+  # root for exactly that reason. This nudges it rather than waiting for the
+  # webhook, and is skipped when the credentials are not configured.
+  packagist:
+    name: Notify Packagist
+    needs: publish
+    runs-on: ubuntu-latest
+    if: ${{ vars.PACKAGIST_USERNAME != '' }}
+
+    steps:
+      - name: Trigger an update
+        run: |
+          curl -sSf -XPOST \
+            -H 'content-type:application/json' \
+            "https://packagist.org/api/update-package?username=${{ vars.PACKAGIST_USERNAME }}&apiToken=${{ secrets.PACKAGIST_TOKEN }}" \
+            -d '{"repository":{"url":"https://github.com/${{ github.repository }}"}}'

@@ -1,0 +1,67 @@
+name: Showcase
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# The showcase is a build artifact, so it is rebuilt from source on every push
+# rather than committed — it can never drift from the components it documents.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, sqlite3, pdo_sqlite
+          coverage: none
+
+      - run: npm ci
+
+      - run: npm run build --workspaces --if-present
+
+      - run: npx @tailwindcss/cli -i packages/core/tests/probe.css -o packages/core/tests/out.css
+
+      - uses: ramsey/composer-install@v3
+
+      - name: Render the showcase
+        run: php playground/build.php
+
+      - name: Collect the site
+        run: |
+          mkdir -p _site
+          cp playground/index.html _site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
