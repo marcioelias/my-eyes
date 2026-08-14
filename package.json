@@ -1,0 +1,19 @@
+{
+  "name": "my-eyes",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/core"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "css:build": "tailwindcss -i ./packages/core/tests/probe.css -o ./packages/core/tests/out.css"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "esbuild": "^0.28.2",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.7.0"
+  }
+}

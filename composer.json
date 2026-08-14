@@ -1,0 +1,73 @@
+{
+    "name": "marcioelias/my-eyes",
+    "description": "Tailwind-based Blade component library and admin scaffolding",
+    "type": "library",
+    "keywords": [
+        "laravel",
+        "blade",
+        "tailwind",
+        "components",
+        "ui",
+        "design-system",
+        "admin",
+        "livewire"
+    ],
+    "homepage": "https://github.com/marcioelias/my-eyes",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "M\u00e1rcio Elias",
+            "email": "marcioelias@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/marcioelias/my-eyes/issues",
+        "source": "https://github.com/marcioelias/my-eyes"
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0",
+        "illuminate/view": "^11.0|^12.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.18",
+        "larastan/larastan": "^3.0",
+        "orchestra/testbench": "^9.0|^10.0",
+        "pestphp/pest": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "MyEyes\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MyEyes\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "MyEyes\\MyEyesServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "pest",
+        "lint": "pint",
+        "analyse": "phpstan analyse",
+        "check": [
+            "@lint",
+            "@analyse",
+            "@test"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
