@@ -1,0 +1,55 @@
+{
+  "name": "@my-eyes/core",
+  "version": "0.1.0",
+  "description": "Design tokens, component styles and headless behaviours shared by every my-eyes frontend",
+  "type": "module",
+  "files": [
+    "css",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./css": "./css/index.css",
+    "./css/*": "./css/*"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && npm run build:standalone",
+    "build:standalone": "esbuild src/standalone.ts --bundle --format=iife --minify --outfile=dist/my-eyes.min.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "tailwindcss": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "tailwind",
+    "components",
+    "design-system",
+    "laravel",
+    "blade",
+    "ui"
+  ],
+  "homepage": "https://github.com/marcioelias/my-eyes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcioelias/my-eyes.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/marcioelias/my-eyes/issues"
+  },
+  "license": "MIT",
+  "author": "Márcio Elias",
+  "sideEffects": [
+    "*.css"
+  ]
+}
