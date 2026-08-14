@@ -13,6 +13,7 @@ declare(strict_types=1);
  *   php playground/build.php
  */
 
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Blade;
@@ -47,7 +48,7 @@ $app = Application::create(
 );
 
 // The provider merges config, so it can only register once config is bootstrapped.
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+$app->make(Kernel::class)->bootstrap();
 $app->register(MyEyesServiceProvider::class);
 
 // The showcase inlines its own assets, so @vite must render nothing.
