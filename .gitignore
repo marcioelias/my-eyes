@@ -2,7 +2,6 @@ node_modules/
 vendor/
 dist/
 composer.lock
-package-lock.json
 packages/core/tests/out.css
 playground/index.html
 playground/fragment.html
