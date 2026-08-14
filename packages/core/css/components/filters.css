@@ -1,0 +1,198 @@
+/*
+ * Advanced filter builder.
+ *
+ * Each condition is a row of "field / operator / value(s) / remove". On desktop
+ * the row is a grid so the controls line up into columns down the panel; on a
+ * phone it stacks, because four controls side by side would each be too narrow
+ * to use.
+ */
+@layer components {
+    .me-filters {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.875rem;
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius);
+        background-color: var(--color-surface);
+    }
+
+    .me-filters__rows {
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+    }
+
+    .me-filters__row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        align-items: start;
+        padding: 0.75rem;
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius);
+        background-color: var(--color-surface-raised);
+    }
+
+    /*
+     * The leading word is what makes the panel read as a sentence rather than a
+     * form: "Where … / and … / and …".
+     *
+     * Row 0 is the fixed "Where". Row 1 carries the and/or select — one choice
+     * governs the whole set. Rows after that echo it as text, so the sentence
+     * still reads top to bottom without implying each row can differ.
+     */
+    .me-filters__conjunction {
+        display: flex;
+        align-items: center;
+        min-height: 2.25rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--color-content-muted);
+    }
+
+    .me-filters__conjunction-select {
+        /* Narrow enough to read as a connector, not as another field. */
+        width: auto;
+        min-width: 4.5rem;
+        padding-block: 0.25rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--me-primary-accent);
+        background-color: var(--me-primary-soft);
+        border-color: var(--me-primary-soft-line);
+        box-shadow: none;
+    }
+
+    .me-filters__values {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .me-filters__values .me-input {
+        min-width: 0;
+    }
+
+    /* Hidden when the operator takes no value ("is empty"). */
+    .me-filters__values[hidden] {
+        display: none;
+    }
+
+    .me-filters__range-sep {
+        font-size: 0.8125rem;
+        color: var(--color-content-muted);
+        flex-shrink: 0;
+    }
+
+    .me-filters__remove {
+        justify-self: start;
+    }
+
+    .me-filters__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .me-filters__actions-end {
+        margin-inline-start: auto;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .me-filters__empty {
+        padding: 1rem;
+        text-align: center;
+        font-size: 0.8125rem;
+        color: var(--color-content-muted);
+        border: 1px dashed var(--color-line-strong);
+        border-radius: var(--me-radius);
+    }
+
+    /*
+     * Panel that holds the builder, anchored under the Filters button.
+     *
+     * Anchored to the trigger's end edge, because the button sits on the right
+     * of a toolbar far more often than the left — growing leftwards keeps it on
+     * screen. That alone is not enough for a panel this wide, so the binding
+     * also measures it and writes --me-shift to nudge it back inside the
+     * viewport; the transform below composes that shift with the open/close
+     * motion so the two cannot overwrite each other.
+     */
+    .me-filters-panel {
+        position: absolute;
+        z-index: 40;
+        top: calc(100% + 0.375rem);
+        inset-inline-end: 0;
+        width: min(44rem, calc(100vw - 1.5rem));
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius-lg);
+        background-color: var(--color-surface-raised);
+        box-shadow: var(--me-shadow-lg);
+        opacity: 0;
+        visibility: hidden;
+        transform: translate(var(--me-shift, 0px), -0.25rem);
+        transition:
+            opacity var(--me-transition),
+            transform var(--me-transition),
+            visibility var(--me-transition);
+    }
+
+    .me-filters-wrap {
+        position: relative;
+        display: inline-flex;
+    }
+
+    .me-filters-wrap[data-open='true'] > .me-filters-panel {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(var(--me-shift, 0px), 0);
+    }
+
+    .me-filters-panel__body {
+        padding: 0.875rem;
+        max-height: min(28rem, 60vh);
+        overflow-y: auto;
+    }
+
+    @media (min-width: 768px) {
+        .me-filters__row {
+            /* conjunction / field / operator / values / remove */
+            grid-template-columns: 3.5rem minmax(8rem, 1fr) minmax(9rem, 1fr) minmax(10rem, 1.4fr) auto;
+            align-items: center;
+            padding: 0.5rem;
+        }
+
+        .me-filters__conjunction {
+            min-height: 0;
+            justify-content: flex-end;
+            padding-inline-end: 0.25rem;
+        }
+    }
+
+    @media (max-width: 767px) {
+        /* Stacked rows need their own labels, since the columns are gone. */
+        .me-filters__row {
+            position: relative;
+            padding-top: 2.25rem;
+        }
+
+        .me-filters__conjunction {
+            position: absolute;
+            top: 0.5rem;
+            inset-inline-start: 0.75rem;
+            min-height: 0;
+            text-transform: uppercase;
+            font-size: 0.6875rem;
+            letter-spacing: 0.06em;
+        }
+
+        .me-filters__remove {
+            position: absolute;
+            top: 0.375rem;
+            inset-inline-end: 0.5rem;
+        }
+    }
+}

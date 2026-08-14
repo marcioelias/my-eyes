@@ -1,0 +1,229 @@
+/*
+ * Text-like controls: input, textarea and the select trigger all share
+ * .me-input so their height, border and focus treatment stay identical.
+ *
+ * Error state is driven by aria-invalid rather than a modifier class — the
+ * accessible attribute has to be there anyway, so styling off it removes a
+ * chance for the two to disagree.
+ */
+@layer components {
+    .me-input {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        border-radius: var(--me-radius);
+        border: 1px solid var(--color-line-strong);
+        background-color: var(--color-surface-input);
+        color: var(--color-content);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        box-shadow: var(--me-shadow-sm);
+        transition:
+            border-color var(--me-transition),
+            box-shadow var(--me-transition),
+            background-color var(--me-transition);
+    }
+
+    .me-input:disabled {
+        cursor: not-allowed;
+        background-color: var(--color-surface-muted);
+        color: var(--color-content-muted);
+        opacity: 0.7;
+    }
+
+    .me-input:read-only:not(:disabled) {
+        background-color: var(--color-surface-muted);
+    }
+
+    .me-input[aria-invalid='true'] {
+        border-color: var(--color-danger-500);
+    }
+
+    /* Sizes */
+    .me-input--sm {
+        padding: 0.375rem 0.625rem;
+        font-size: 0.8125rem;
+    }
+
+    .me-input--lg {
+        padding: 0.625rem 0.875rem;
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    .me-textarea {
+        min-height: 5rem;
+        resize: vertical;
+    }
+
+    /*
+     * Input group: an input flanked by addons (icons, units, buttons).
+     * The wrapper owns the border and focus ring so the whole group reads as a
+     * single control; the inner input goes transparent.
+     */
+    .me-input-group {
+        position: relative;
+        display: flex;
+        align-items: stretch;
+        width: 100%;
+        border-radius: var(--me-radius);
+        border: 1px solid var(--color-line-strong);
+        background-color: var(--color-surface-input);
+        box-shadow: var(--me-shadow-sm);
+        transition:
+            border-color var(--me-transition),
+            box-shadow var(--me-transition);
+
+        /*
+         * Addons and steppers are square boxes inside a rounded container, so
+         * without clipping they fill the corner the radius should leave empty
+         * and the group reads as a rectangle with a rounded outline drawn on
+         * top. Clipping here also means children never need to know the
+         * container's radius — no concentric calc() to keep in sync.
+         */
+        overflow: hidden;
+    }
+
+    .me-input-group:has(.me-input[aria-invalid='true']) {
+        border-color: var(--color-danger-500);
+    }
+
+    .me-input-group:has(.me-input:disabled) {
+        background-color: var(--color-surface-muted);
+        opacity: 0.7;
+    }
+
+    /* The input inside a group defers its chrome to the wrapper. */
+    .me-input-group > .me-input {
+        border: 0;
+        background-color: transparent;
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    .me-input-group > .me-input:focus-visible {
+        outline: none;
+    }
+
+    .me-input-addon {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        flex-shrink: 0;
+        padding-inline: 0.75rem;
+        font-size: 0.875rem;
+        color: var(--color-content-muted);
+        background-color: transparent;
+    }
+
+    .me-input-addon svg {
+        width: 1.125rem;
+        height: 1.125rem;
+    }
+
+    /* An addon that is itself a control (password reveal, clear, step). */
+    .me-input-addon--action {
+        padding-inline: 0.5rem;
+        cursor: pointer;
+        border: 0;
+        background: none;
+        color: var(--color-content-muted);
+        transition: color var(--me-transition);
+    }
+
+    .me-input-addon--action:hover {
+        color: var(--color-content);
+    }
+
+    /*
+     * Password reveal. Both icons ship in the markup and CSS picks one, so the
+     * JS binding only has to flip a single attribute.
+     */
+    .me-reveal-hide,
+    [data-revealed='true'] .me-reveal-show {
+        display: none;
+    }
+
+    [data-revealed='true'] .me-reveal-hide {
+        display: block;
+    }
+
+    /*
+     * A separated addon reads as a distinct segment (units, currency).
+     * No corner radius of its own — the group clips it.
+     */
+    .me-input-addon--bordered {
+        background-color: var(--color-surface-muted);
+        color: var(--color-content-muted);
+    }
+
+    .me-input-addon--bordered:first-child {
+        border-inline-end: 1px solid var(--color-line);
+    }
+
+    .me-input-addon--bordered:last-child {
+        border-inline-start: 1px solid var(--color-line);
+    }
+
+    /*
+     * Numeric input: right-aligned value, native spinners removed in favour of
+     * explicit stepper buttons that are large enough to hit on a phone.
+     */
+    .me-input--numeric {
+        text-align: end;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .me-input--numeric::-webkit-outer-spin-button,
+    .me-input--numeric::-webkit-inner-spin-button {
+        appearance: none;
+        margin: 0;
+    }
+
+    .me-input--numeric[type='number'] {
+        appearance: textfield;
+        -moz-appearance: textfield;
+    }
+
+    .me-stepper {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        border-inline-start: 1px solid var(--color-line);
+    }
+
+    .me-stepper button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        width: 2rem;
+        border: 0;
+        background: none;
+        cursor: pointer;
+        color: var(--color-content-muted);
+        transition:
+            background-color var(--me-transition),
+            color var(--me-transition);
+    }
+
+    .me-stepper button:hover:not(:disabled) {
+        background-color: var(--color-surface-muted);
+        color: var(--color-content);
+    }
+
+    .me-stepper button:disabled {
+        cursor: not-allowed;
+        opacity: 0.4;
+    }
+
+    .me-stepper button:first-child {
+        border-bottom: 1px solid var(--color-line);
+    }
+
+    .me-stepper svg {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
+}

@@ -1,0 +1,207 @@
+/*
+ * Progress indicators.
+ *
+ * Linear and circular, each in determinate and indeterminate form. The value is
+ * carried by a --me-progress custom property (a percentage) rather than an
+ * inline width, so the same markup animates smoothly when the number changes
+ * and a caller only ever sets one thing.
+ */
+@layer components {
+    .me-progress {
+        --me-progress: 0%;
+        --me-progress-color: var(--color-primary-600);
+
+        display: block;
+        width: 100%;
+        height: 0.5rem;
+        border-radius: var(--me-radius-full);
+        background-color: var(--color-surface-muted);
+        overflow: hidden;
+    }
+
+    .me-progress__bar {
+        display: block;
+        height: 100%;
+        width: var(--me-progress);
+        border-radius: inherit;
+        background-color: var(--me-progress-color);
+        transition: width 300ms ease-out;
+    }
+
+    .me-progress--xs {
+        height: 0.25rem;
+    }
+
+    .me-progress--sm {
+        height: 0.375rem;
+    }
+
+    .me-progress--lg {
+        height: 0.75rem;
+    }
+
+    .me-progress--primary {
+        --me-progress-color: var(--color-primary-600);
+    }
+
+    .me-progress--success {
+        --me-progress-color: var(--color-success-600);
+    }
+
+    .me-progress--danger {
+        --me-progress-color: var(--color-danger-600);
+    }
+
+    .me-progress--warning {
+        --me-progress-color: var(--color-warning-500);
+    }
+
+    .me-progress--info {
+        --me-progress-color: var(--color-info-600);
+    }
+
+    /*
+     * Indeterminate: a short bar sweeping the track, for work whose length is
+     * unknown. The width is fixed and the position animates, so it reads as
+     * "still working" rather than as a stalled value.
+     */
+    .me-progress--indeterminate .me-progress__bar {
+        width: 35%;
+        transition: none;
+        animation: me-progress-sweep 1.4s ease-in-out infinite;
+    }
+
+    @keyframes me-progress-sweep {
+        0% {
+            transform: translateX(-110%);
+        }
+        100% {
+            transform: translateX(320%);
+        }
+    }
+
+    /* Label row above the track: description on one side, value on the other. */
+    .me-progress-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+    }
+
+    .me-progress-field__header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.5rem;
+        font-size: 0.8125rem;
+    }
+
+    .me-progress-field__label {
+        color: var(--color-content);
+        font-weight: 500;
+    }
+
+    .me-progress-field__value {
+        color: var(--color-content-muted);
+        font-variant-numeric: tabular-nums;
+    }
+
+    /*
+     * Circular progress.
+     *
+     * A conic-gradient rather than an SVG ring: one element, no path maths, and
+     * the same --me-progress property drives it. The inner disc is masked out
+     * so it reads as a ring instead of a pie.
+     */
+    .me-progress-ring {
+        --me-progress: 0%;
+        --me-progress-color: var(--color-primary-600);
+        --me-ring-thickness: 0.375rem;
+
+        position: relative;
+        display: inline-grid;
+        place-items: center;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: var(--me-radius-full);
+        background: conic-gradient(
+            var(--me-progress-color) var(--me-progress),
+            var(--color-surface-muted) 0
+        );
+        transition: background 300ms ease-out;
+    }
+
+    .me-progress-ring::before {
+        content: '';
+        position: absolute;
+        inset: var(--me-ring-thickness);
+        border-radius: inherit;
+        background-color: var(--color-surface-raised);
+    }
+
+    .me-progress-ring__value {
+        position: relative;
+        font-size: 0.75rem;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        color: var(--color-content);
+    }
+
+    .me-progress-ring--sm {
+        width: 2.5rem;
+        height: 2.5rem;
+        --me-ring-thickness: 0.25rem;
+    }
+
+    .me-progress-ring--sm .me-progress-ring__value {
+        font-size: 0.625rem;
+    }
+
+    .me-progress-ring--lg {
+        width: 5rem;
+        height: 5rem;
+        --me-ring-thickness: 0.5rem;
+    }
+
+    .me-progress-ring--lg .me-progress-ring__value {
+        font-size: 1rem;
+    }
+
+    .me-progress-ring--success {
+        --me-progress-color: var(--color-success-600);
+    }
+
+    .me-progress-ring--danger {
+        --me-progress-color: var(--color-danger-600);
+    }
+
+    .me-progress-ring--warning {
+        --me-progress-color: var(--color-warning-500);
+    }
+
+    .me-progress-ring--info {
+        --me-progress-color: var(--color-info-600);
+    }
+
+    .me-progress-ring--indeterminate {
+        background: conic-gradient(
+            var(--me-progress-color) 25%,
+            var(--color-surface-muted) 0
+        );
+        animation: me-spin 0.9s linear infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .me-progress__bar,
+        .me-progress-ring {
+            transition: none;
+        }
+
+        .me-progress--indeterminate .me-progress__bar {
+            animation-duration: 3s;
+        }
+
+        .me-progress-ring--indeterminate {
+            animation-duration: 2.5s;
+        }
+    }
+}

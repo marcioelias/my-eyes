@@ -1,0 +1,241 @@
+/*
+ * Design tokens.
+ *
+ * Two layers, on purpose:
+ *
+ *   1. Palette   — full 50..950 scales per semantic role (primary, danger, ...).
+ *                  Rebrand by remapping these in your own @theme block.
+ *   2. Surfaces  — a small set of role tokens (surface, content, line) that
+ *                  swap between light and dark. Components reference these,
+ *                  never raw palette steps, so dark mode needs no per-component
+ *                  overrides.
+ *
+ * Surfaces are declared in @theme as var() indirections to plain custom
+ * properties. That is what makes them runtime-switchable: Tailwind emits
+ * `background-color: var(--color-surface)`, which resolves through
+ * `--me-surface`, which the light/dark blocks below redefine.
+ */
+
+@theme {
+    --color-primary-50: var(--color-blue-50);
+    --color-primary-100: var(--color-blue-100);
+    --color-primary-200: var(--color-blue-200);
+    --color-primary-300: var(--color-blue-300);
+    --color-primary-400: var(--color-blue-400);
+    --color-primary-500: var(--color-blue-500);
+    --color-primary-600: var(--color-blue-600);
+    --color-primary-700: var(--color-blue-700);
+    --color-primary-800: var(--color-blue-800);
+    --color-primary-900: var(--color-blue-900);
+    --color-primary-950: var(--color-blue-950);
+
+    --color-secondary-50: var(--color-slate-50);
+    --color-secondary-100: var(--color-slate-100);
+    --color-secondary-200: var(--color-slate-200);
+    --color-secondary-300: var(--color-slate-300);
+    --color-secondary-400: var(--color-slate-400);
+    --color-secondary-500: var(--color-slate-500);
+    --color-secondary-600: var(--color-slate-600);
+    --color-secondary-700: var(--color-slate-700);
+    --color-secondary-800: var(--color-slate-800);
+    --color-secondary-900: var(--color-slate-900);
+    --color-secondary-950: var(--color-slate-950);
+
+    --color-success-50: var(--color-emerald-50);
+    --color-success-100: var(--color-emerald-100);
+    --color-success-200: var(--color-emerald-200);
+    --color-success-300: var(--color-emerald-300);
+    --color-success-400: var(--color-emerald-400);
+    --color-success-500: var(--color-emerald-500);
+    --color-success-600: var(--color-emerald-600);
+    --color-success-700: var(--color-emerald-700);
+    --color-success-800: var(--color-emerald-800);
+    --color-success-900: var(--color-emerald-900);
+    --color-success-950: var(--color-emerald-950);
+
+    --color-danger-50: var(--color-red-50);
+    --color-danger-100: var(--color-red-100);
+    --color-danger-200: var(--color-red-200);
+    --color-danger-300: var(--color-red-300);
+    --color-danger-400: var(--color-red-400);
+    --color-danger-500: var(--color-red-500);
+    --color-danger-600: var(--color-red-600);
+    --color-danger-700: var(--color-red-700);
+    --color-danger-800: var(--color-red-800);
+    --color-danger-900: var(--color-red-900);
+    --color-danger-950: var(--color-red-950);
+
+    --color-warning-50: var(--color-amber-50);
+    --color-warning-100: var(--color-amber-100);
+    --color-warning-200: var(--color-amber-200);
+    --color-warning-300: var(--color-amber-300);
+    --color-warning-400: var(--color-amber-400);
+    --color-warning-500: var(--color-amber-500);
+    --color-warning-600: var(--color-amber-600);
+    --color-warning-700: var(--color-amber-700);
+    --color-warning-800: var(--color-amber-800);
+    --color-warning-900: var(--color-amber-900);
+    --color-warning-950: var(--color-amber-950);
+
+    --color-info-50: var(--color-sky-50);
+    --color-info-100: var(--color-sky-100);
+    --color-info-200: var(--color-sky-200);
+    --color-info-300: var(--color-sky-300);
+    --color-info-400: var(--color-sky-400);
+    --color-info-500: var(--color-sky-500);
+    --color-info-600: var(--color-sky-600);
+    --color-info-700: var(--color-sky-700);
+    --color-info-800: var(--color-sky-800);
+    --color-info-900: var(--color-sky-900);
+    --color-info-950: var(--color-sky-950);
+
+    /* Role tokens — see the note above on the var() indirection. */
+    --color-surface: var(--me-surface);
+    --color-surface-raised: var(--me-surface-raised);
+    --color-surface-muted: var(--me-surface-muted);
+    --color-surface-input: var(--me-surface-input);
+    --color-content: var(--me-content);
+    --color-content-muted: var(--me-content-muted);
+    --color-content-subtle: var(--me-content-subtle);
+    --color-content-inverse: var(--me-content-inverse);
+    --color-line: var(--me-line);
+    --color-line-strong: var(--me-line-strong);
+}
+
+/*
+ * Tinted ("soft") surfaces per role, for outline buttons, alerts, badges and
+ * the active nav item — the places where colour carries meaning without
+ * flooding the page.
+ *
+ * Backgrounds and borders are derived with color-mix() against the current
+ * surface, so they follow light/dark automatically and need no second
+ * definition. Only the accent (text/icon colour) has to flip, since it must
+ * stay legible against the surface rather than tint with it.
+ */
+:root {
+    --me-primary-soft: color-mix(in oklch, var(--color-primary-500) 10%, var(--color-surface-raised));
+    --me-primary-soft-hover: color-mix(in oklch, var(--color-primary-500) 18%, var(--color-surface-raised));
+    --me-primary-soft-line: color-mix(in oklch, var(--color-primary-500) 32%, transparent);
+
+    --me-secondary-soft: var(--color-surface-muted);
+    --me-secondary-soft-hover: color-mix(in oklch, var(--color-content) 8%, var(--color-surface-muted));
+    --me-secondary-soft-line: var(--color-line-strong);
+
+    --me-success-soft: color-mix(in oklch, var(--color-success-500) 10%, var(--color-surface-raised));
+    --me-success-soft-hover: color-mix(in oklch, var(--color-success-500) 18%, var(--color-surface-raised));
+    --me-success-soft-line: color-mix(in oklch, var(--color-success-500) 32%, transparent);
+
+    --me-danger-soft: color-mix(in oklch, var(--color-danger-500) 10%, var(--color-surface-raised));
+    --me-danger-soft-hover: color-mix(in oklch, var(--color-danger-500) 18%, var(--color-surface-raised));
+    --me-danger-soft-line: color-mix(in oklch, var(--color-danger-500) 32%, transparent);
+
+    --me-warning-soft: color-mix(in oklch, var(--color-warning-500) 12%, var(--color-surface-raised));
+    --me-warning-soft-hover: color-mix(in oklch, var(--color-warning-500) 20%, var(--color-surface-raised));
+    --me-warning-soft-line: color-mix(in oklch, var(--color-warning-500) 32%, transparent);
+
+    --me-info-soft: color-mix(in oklch, var(--color-info-500) 10%, var(--color-surface-raised));
+    --me-info-soft-hover: color-mix(in oklch, var(--color-info-500) 18%, var(--color-surface-raised));
+    --me-info-soft-line: color-mix(in oklch, var(--color-info-500) 32%, transparent);
+}
+
+/*
+ * Shape and motion. Plain custom properties rather than @theme entries: these
+ * are consumed directly by component CSS, not exposed as utilities.
+ */
+:root {
+    --me-radius-sm: 0.375rem;
+    --me-radius: 0.5rem;
+    --me-radius-lg: 0.75rem;
+    --me-radius-full: 9999px;
+
+    /*
+     * Focus.
+     *
+     * Controls that already have a border (inputs, selects, checkboxes) thicken
+     * that border and add a soft halo — one line, not two. Elements without a
+     * border (buttons, links) use a detached outline instead, where the ring
+     * reads correctly on its own.
+     */
+    --me-focus: var(--color-primary-500);
+    --me-focus-halo: color-mix(in oklch, var(--me-focus) 22%, transparent);
+    --me-focus-halo-width: 3px;
+
+    --me-ring-width: 2px;
+    --me-ring-offset: 2px;
+
+    --me-transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    --me-sidebar-width: 16rem;
+    --me-sidebar-width-collapsed: 4.5rem;
+    --me-topbar-height: 3.5rem;
+}
+
+/*
+ * Light and dark values are declared once, side by side, via light-dark().
+ * Which side applies is decided purely by `color-scheme`, so switching themes
+ * means flipping one property instead of redeclaring the token set — the two
+ * palettes cannot drift apart.
+ *
+ * Default: follow the OS. A `.dark` class or [data-theme] on any ancestor
+ * overrides it, so this drops into an existing toggle without changes.
+ */
+:root {
+    color-scheme: light dark;
+
+    --me-surface: light-dark(var(--color-slate-50), var(--color-slate-950));
+    --me-surface-raised: light-dark(#fff, var(--color-slate-900));
+    --me-surface-muted: light-dark(var(--color-slate-100), var(--color-slate-800));
+    --me-surface-input: light-dark(#fff, var(--color-slate-800));
+    --me-content: light-dark(var(--color-slate-900), var(--color-slate-100));
+    --me-content-muted: light-dark(var(--color-slate-600), var(--color-slate-400));
+    --me-content-subtle: light-dark(var(--color-slate-400), var(--color-slate-500));
+    --me-content-inverse: light-dark(#fff, var(--color-slate-950));
+    --me-line: light-dark(var(--color-slate-200), var(--color-slate-800));
+    --me-line-strong: light-dark(var(--color-slate-300), var(--color-slate-700));
+
+    --me-primary-accent: light-dark(var(--color-primary-700), var(--color-primary-300));
+    --me-secondary-accent: light-dark(var(--color-secondary-700), var(--color-secondary-300));
+    --me-success-accent: light-dark(var(--color-success-700), var(--color-success-300));
+    --me-danger-accent: light-dark(var(--color-danger-700), var(--color-danger-300));
+    --me-warning-accent: light-dark(var(--color-warning-700), var(--color-warning-300));
+    --me-info-accent: light-dark(var(--color-info-700), var(--color-info-300));
+
+    /*
+     * Modal backdrop. Light enough to keep the page readable behind the
+     * dialog — it should recede, not disappear — and a little deeper in dark
+     * mode, where a faint veil would not register at all.
+     */
+    --me-backdrop: light-dark(rgb(15 23 42 / 0.35), rgb(0 0 0 / 0.55));
+
+    /* Shadows carry a colour token so they can darken with the theme too. */
+    --me-shadow-color: light-dark(rgb(15 23 42 / 0.08), rgb(0 0 0 / 0.4));
+    --me-shadow-color-weak: light-dark(rgb(15 23 42 / 0.06), rgb(0 0 0 / 0.3));
+    --me-shadow-sm: 0 1px 2px 0 var(--me-shadow-color-weak);
+    --me-shadow: 0 1px 3px 0 var(--me-shadow-color), 0 1px 2px -1px var(--me-shadow-color-weak);
+    --me-shadow-lg: 0 8px 24px -6px var(--me-shadow-color), 0 2px 6px -2px var(--me-shadow-color-weak);
+}
+
+[data-theme='light'],
+.light {
+    color-scheme: light;
+}
+
+[data-theme='dark'],
+.dark {
+    color-scheme: dark;
+}
+
+/*
+ * Class-based dark variant, so `dark:` works in app code regardless of whether
+ * the theme is driven by the OS or by the `.dark` / [data-theme] toggle.
+ */
+@custom-variant dark {
+    @media (prefers-color-scheme: dark) {
+        &:where(:root:not([data-theme='light']):not(.light) *) {
+            @slot;
+        }
+    }
+    &:where([data-theme='dark'] *, .dark *) {
+        @slot;
+    }
+}

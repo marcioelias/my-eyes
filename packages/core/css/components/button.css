@@ -1,0 +1,282 @@
+/*
+ * Buttons are driven by four custom properties (bg, hover, active, fg/border).
+ * The base class consumes them; each variant only declares colours, so adding a
+ * variant is a four-line change and solid/outline/ghost share one set of layout
+ * declarations.
+ *
+ * Outline and ghost variants use the role "soft" tokens from theme.css, which
+ * are derived with color-mix() against the current surface — that is why there
+ * is no dark-mode block anywhere in this file.
+ */
+@layer components {
+    .me-btn {
+        --me-btn-bg: transparent;
+        --me-btn-bg-hover: transparent;
+        --me-btn-bg-active: transparent;
+        --me-btn-fg: var(--color-content);
+        --me-btn-border: transparent;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: var(--me-radius);
+        border: 1px solid var(--me-btn-border);
+        background-color: var(--me-btn-bg);
+        color: var(--me-btn-fg);
+        font-weight: 500;
+        line-height: 1.25rem;
+        white-space: nowrap;
+        cursor: pointer;
+        user-select: none;
+        transition:
+            background-color var(--me-transition),
+            border-color var(--me-transition),
+            color var(--me-transition),
+            box-shadow var(--me-transition);
+
+        /* Default size, so `class="me-btn me-btn--primary"` is already usable. */
+        padding: 0.5rem 0.875rem;
+        font-size: 0.875rem;
+    }
+
+    .me-btn:hover:not(:disabled):not([aria-disabled='true']) {
+        background-color: var(--me-btn-bg-hover);
+    }
+
+    .me-btn:active:not(:disabled):not([aria-disabled='true']) {
+        background-color: var(--me-btn-bg-active);
+    }
+
+    .me-btn:disabled,
+    .me-btn[aria-disabled='true'] {
+        cursor: not-allowed;
+        opacity: 0.55;
+    }
+
+    .me-btn svg {
+        width: 1.25em;
+        height: 1.25em;
+        flex-shrink: 0;
+    }
+
+    /* Sizes */
+    .me-btn--xs {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1rem;
+        gap: 0.25rem;
+    }
+
+    .me-btn--sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8125rem;
+        gap: 0.375rem;
+    }
+
+    .me-btn--md {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.875rem;
+    }
+
+    .me-btn--lg {
+        padding: 0.625rem 1.25rem;
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    /* Square padding for icon-only buttons — keeps the hit area balanced. */
+    .me-btn--icon {
+        padding: 0.5rem;
+    }
+
+    .me-btn--icon.me-btn--xs {
+        padding: 0.25rem;
+    }
+
+    .me-btn--icon.me-btn--sm {
+        padding: 0.375rem;
+    }
+
+    .me-btn--icon.me-btn--lg {
+        padding: 0.625rem;
+    }
+
+    .me-btn--block {
+        display: flex;
+        width: 100%;
+    }
+
+    /* Solid variants */
+    .me-btn--primary {
+        --me-btn-bg: var(--color-primary-600);
+        --me-btn-bg-hover: var(--color-primary-700);
+        --me-btn-bg-active: var(--color-primary-800);
+        --me-btn-fg: #fff;
+        box-shadow: var(--me-shadow-sm);
+    }
+
+    .me-btn--secondary {
+        --me-btn-bg: var(--color-surface-raised);
+        --me-btn-bg-hover: var(--color-surface-muted);
+        --me-btn-bg-active: var(--color-surface-muted);
+        --me-btn-fg: var(--color-content);
+        --me-btn-border: var(--color-line-strong);
+        box-shadow: var(--me-shadow-sm);
+    }
+
+    .me-btn--success {
+        --me-btn-bg: var(--color-success-600);
+        --me-btn-bg-hover: var(--color-success-700);
+        --me-btn-bg-active: var(--color-success-800);
+        --me-btn-fg: #fff;
+        box-shadow: var(--me-shadow-sm);
+    }
+
+    .me-btn--danger {
+        --me-btn-bg: var(--color-danger-600);
+        --me-btn-bg-hover: var(--color-danger-700);
+        --me-btn-bg-active: var(--color-danger-800);
+        --me-btn-fg: #fff;
+        box-shadow: var(--me-shadow-sm);
+    }
+
+    .me-btn--warning {
+        --me-btn-bg: var(--color-warning-500);
+        --me-btn-bg-hover: var(--color-warning-600);
+        --me-btn-bg-active: var(--color-warning-700);
+        --me-btn-fg: var(--color-warning-950);
+        box-shadow: var(--me-shadow-sm);
+    }
+
+    .me-btn--info {
+        --me-btn-bg: var(--color-info-600);
+        --me-btn-bg-hover: var(--color-info-700);
+        --me-btn-bg-active: var(--color-info-800);
+        --me-btn-fg: #fff;
+        box-shadow: var(--me-shadow-sm);
+    }
+
+    /* Outline variants — colour in the border and the text, tint on hover. */
+    .me-btn--outline-primary {
+        --me-btn-fg: var(--me-primary-accent);
+        --me-btn-border: var(--me-primary-soft-line);
+        --me-btn-bg-hover: var(--me-primary-soft);
+        --me-btn-bg-active: var(--me-primary-soft-hover);
+    }
+
+    .me-btn--outline-secondary {
+        --me-btn-fg: var(--color-content);
+        --me-btn-border: var(--color-line-strong);
+        --me-btn-bg-hover: var(--me-secondary-soft);
+        --me-btn-bg-active: var(--me-secondary-soft-hover);
+    }
+
+    .me-btn--outline-success {
+        --me-btn-fg: var(--me-success-accent);
+        --me-btn-border: var(--me-success-soft-line);
+        --me-btn-bg-hover: var(--me-success-soft);
+        --me-btn-bg-active: var(--me-success-soft-hover);
+    }
+
+    .me-btn--outline-danger {
+        --me-btn-fg: var(--me-danger-accent);
+        --me-btn-border: var(--me-danger-soft-line);
+        --me-btn-bg-hover: var(--me-danger-soft);
+        --me-btn-bg-active: var(--me-danger-soft-hover);
+    }
+
+    .me-btn--outline-warning {
+        --me-btn-fg: var(--me-warning-accent);
+        --me-btn-border: var(--me-warning-soft-line);
+        --me-btn-bg-hover: var(--me-warning-soft);
+        --me-btn-bg-active: var(--me-warning-soft-hover);
+    }
+
+    .me-btn--outline-info {
+        --me-btn-fg: var(--me-info-accent);
+        --me-btn-border: var(--me-info-soft-line);
+        --me-btn-bg-hover: var(--me-info-soft);
+        --me-btn-bg-active: var(--me-info-soft-hover);
+    }
+
+    /* Low-emphasis variants */
+    .me-btn--ghost {
+        --me-btn-fg: var(--color-content-muted);
+        --me-btn-bg-hover: var(--color-surface-muted);
+        --me-btn-bg-active: var(--color-surface-muted);
+    }
+
+    .me-btn--ghost:hover:not(:disabled) {
+        --me-btn-fg: var(--color-content);
+    }
+
+    .me-btn--link {
+        --me-btn-fg: var(--me-primary-accent);
+        padding-left: 0;
+        padding-right: 0;
+        box-shadow: none;
+    }
+
+    .me-btn--link:hover:not(:disabled) {
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    /*
+     * Loading state: the label keeps its box (so the button does not resize)
+     * but is hidden, and a spinner is centred over it.
+     */
+    .me-btn[data-loading='true'] {
+        position: relative;
+        pointer-events: none;
+    }
+
+    .me-btn[data-loading='true'] > * {
+        visibility: hidden;
+    }
+
+    .me-btn[data-loading='true']::after {
+        content: '';
+        position: absolute;
+        width: 1rem;
+        height: 1rem;
+        border-radius: var(--me-radius-full);
+        border: 2px solid color-mix(in oklch, var(--me-btn-fg) 30%, transparent);
+        border-top-color: var(--me-btn-fg);
+        animation: me-spin 0.6s linear infinite;
+    }
+
+    .me-btn-group {
+        display: inline-flex;
+    }
+
+    .me-btn-group > .me-btn {
+        border-radius: 0;
+    }
+
+    .me-btn-group > .me-btn:first-child {
+        border-start-start-radius: var(--me-radius);
+        border-end-start-radius: var(--me-radius);
+    }
+
+    .me-btn-group > .me-btn:last-child {
+        border-start-end-radius: var(--me-radius);
+        border-end-end-radius: var(--me-radius);
+    }
+
+    .me-btn-group > .me-btn:not(:first-child) {
+        margin-inline-start: -1px;
+    }
+
+    .me-btn-group > .me-btn:hover,
+    .me-btn-group > .me-btn:focus-visible {
+        z-index: 1;
+    }
+}
+
+@keyframes me-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

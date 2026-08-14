@@ -1,0 +1,252 @@
+/*
+ * Cards, avatars and the small layout helpers the admin pages lean on.
+ * Cards carry a hairline border plus the faintest shadow — enough to separate
+ * them from the page without the boxed-in look of a heavier UI kit.
+ */
+@layer components {
+    .me-card {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius-lg);
+        background-color: var(--color-surface-raised);
+        box-shadow: var(--me-shadow-sm);
+    }
+
+    .me-card__header {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--color-line);
+    }
+
+    .me-card__title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--color-content);
+    }
+
+    .me-card__description {
+        margin-top: 0.125rem;
+        font-size: 0.8125rem;
+        color: var(--color-content-muted);
+    }
+
+    .me-card__header-actions {
+        margin-inline-start: auto;
+        flex-shrink: 0;
+    }
+
+    .me-card__body {
+        padding: 1rem;
+        flex: 1;
+    }
+
+    .me-card__footer {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-top: 1px solid var(--color-line);
+        background-color: color-mix(in oklch, var(--color-surface-muted) 50%, transparent);
+
+        /*
+         * Concentric radius: an inner corner sitting 1px inside a rounded
+         * border must be exactly that much tighter, or the two curves drift
+         * apart and the fill bleeds over the border.
+         *
+         * The card cannot clip its children the way .me-input-group does —
+         * a dropdown in the header has to escape the box.
+         */
+        border-end-start-radius: calc(var(--me-radius-lg) - 1px);
+        border-end-end-radius: calc(var(--me-radius-lg) - 1px);
+    }
+
+    .me-card__footer--end {
+        justify-content: flex-end;
+    }
+
+    /* Avatar */
+    .me-avatar {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 2rem;
+        height: 2rem;
+        border-radius: var(--me-radius-full);
+        background-color: var(--me-primary-soft);
+        color: var(--me-primary-accent);
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1;
+        overflow: hidden;
+        user-select: none;
+    }
+
+    .me-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .me-avatar--sm {
+        width: 1.5rem;
+        height: 1.5rem;
+        font-size: 0.625rem;
+    }
+
+    .me-avatar--lg {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 0.875rem;
+    }
+
+    .me-avatar--xl {
+        width: 4rem;
+        height: 4rem;
+        font-size: 1.25rem;
+    }
+
+    /*
+     * Presence dot. overflow:hidden on .me-avatar would clip it, so it lives on
+     * a wrapper instead of inside the avatar.
+     */
+    .me-avatar-wrap {
+        position: relative;
+        display: inline-flex;
+    }
+
+    .me-avatar-wrap .me-dot {
+        position: absolute;
+        inset-block-end: 0;
+        inset-inline-end: 0;
+        border: 2px solid var(--color-surface-raised);
+        width: 0.75rem;
+        height: 0.75rem;
+    }
+
+    /* A trigger that pairs an avatar with a name — the topbar user button. */
+    .me-user-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem;
+        border: 0;
+        border-radius: var(--me-radius-full);
+        background: none;
+        cursor: pointer;
+        transition: background-color var(--me-transition);
+    }
+
+    .me-user-button:hover {
+        background-color: var(--color-surface-muted);
+    }
+
+    .me-user-button__name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-content);
+        max-width: 10rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /*
+     * Theme control icons.
+     *
+     * The button shows the mode that is *selected*, not the one currently in
+     * effect — otherwise "system" would be indistinguishable from an explicit
+     * choice that happens to match the OS right now.
+     *
+     * No data-theme attribute means "follow the system", which is the default,
+     * so the monitor icon is the one shown when nothing has been chosen.
+     */
+    .me-theme-icon-light,
+    .me-theme-icon-dark {
+        display: none;
+    }
+
+    .me-theme-icon-system {
+        display: block;
+    }
+
+    [data-theme='light'] .me-theme-icon-system,
+    [data-theme='dark'] .me-theme-icon-system {
+        display: none;
+    }
+
+    [data-theme='light'] .me-theme-icon-light {
+        display: block;
+    }
+
+    [data-theme='dark'] .me-theme-icon-dark {
+        display: block;
+    }
+
+    /* Layout helpers used across the admin pages. */
+    .me-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .me-stack--tight {
+        gap: 0.5rem;
+    }
+
+    .me-stack--loose {
+        gap: 1.5rem;
+    }
+
+    .me-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .me-row--between {
+        justify-content: space-between;
+    }
+
+    .me-row--end {
+        justify-content: flex-end;
+    }
+
+    /* Visibility helpers for the chrome — see also .me-hide-collapsed. */
+    .me-hide-mobile {
+        display: none;
+    }
+
+    @media (min-width: 640px) {
+        .me-hide-mobile {
+            display: initial;
+        }
+    }
+
+    .me-divider {
+        height: 1px;
+        border: 0;
+        background-color: var(--color-line);
+    }
+
+    .me-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 2.5rem 1rem;
+        text-align: center;
+        color: var(--color-content-muted);
+    }
+
+    .me-empty svg {
+        width: 2rem;
+        height: 2rem;
+        color: var(--color-content-subtle);
+    }
+}

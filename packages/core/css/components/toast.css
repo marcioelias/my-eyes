@@ -1,0 +1,258 @@
+/*
+ * Toasts.
+ *
+ * A fixed container per screen position holds a stack of messages. New toasts
+ * are always appended; for the bottom positions the stack is reversed so the
+ * newest sits nearest the edge the user is looking at, and older ones push away
+ * from it rather than jumping.
+ *
+ * The auto-dismiss countdown is a CSS animation whose duration is set per toast,
+ * so the progress bar and the timer are the same thing — the bar cannot show a
+ * time that differs from when the toast actually closes. Hovering pauses both.
+ */
+@layer components {
+    .me-toasts {
+        position: fixed;
+        z-index: 90;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: min(24rem, calc(100vw - 1.5rem));
+
+        /* The container spans a region; only the toasts inside it are clickable. */
+        pointer-events: none;
+    }
+
+    .me-toasts > * {
+        pointer-events: auto;
+    }
+
+    .me-toasts[data-position^='top'] {
+        top: 0.75rem;
+    }
+
+    .me-toasts[data-position^='bottom'] {
+        bottom: 0.75rem;
+        flex-direction: column-reverse;
+    }
+
+    .me-toasts[data-position$='start'] {
+        inset-inline-start: 0.75rem;
+    }
+
+    .me-toasts[data-position$='end'] {
+        inset-inline-end: 0.75rem;
+    }
+
+    .me-toasts[data-position$='center'] {
+        inset-inline-start: 50%;
+        transform: translateX(-50%);
+    }
+
+    .me-toast {
+        --me-toast-accent: var(--color-content-muted);
+        --me-toast-soft: var(--color-surface-muted);
+
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.625rem;
+        padding: 0.75rem 0.875rem;
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius);
+        background-color: var(--color-surface-raised);
+        box-shadow: var(--me-shadow-lg);
+        overflow: hidden;
+        animation: me-toast-in 220ms cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+
+    /*
+     * A hairline of role colour down the leading edge — enough to tell a success
+     * from an error at a glance without tinting the whole surface.
+     */
+    .me-toast::before {
+        content: '';
+        position: absolute;
+        inset-block: 0;
+        inset-inline-start: 0;
+        width: 3px;
+        background-color: var(--me-toast-accent);
+    }
+
+    .me-toast__icon {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: var(--me-radius-full);
+        background-color: var(--me-toast-soft);
+        color: var(--me-toast-accent);
+    }
+
+    .me-toast__icon svg {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
+
+    .me-toast__body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+    }
+
+    .me-toast__title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1.25rem;
+        color: var(--color-content);
+    }
+
+    .me-toast__text {
+        font-size: 0.8125rem;
+        line-height: 1.125rem;
+        color: var(--color-content-muted);
+        overflow-wrap: anywhere;
+    }
+
+    .me-toast__close {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        margin: -0.125rem -0.25rem 0 0;
+        border: 0;
+        border-radius: var(--me-radius-sm);
+        background: none;
+        cursor: pointer;
+        color: var(--color-content-subtle);
+        transition:
+            background-color var(--me-transition),
+            color var(--me-transition);
+    }
+
+    .me-toast__close:hover {
+        background-color: var(--color-surface-muted);
+        color: var(--color-content);
+    }
+
+    .me-toast__close svg {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
+
+    /*
+     * Countdown bar. --me-toast-duration is set per toast by the caller; the
+     * animation drains the bar over exactly that time.
+     */
+    .me-toast__progress {
+        position: absolute;
+        inset-block-end: 0;
+        inset-inline: 0;
+        height: 2px;
+        background-color: var(--me-toast-accent);
+        transform-origin: inline-start;
+        animation: me-toast-drain var(--me-toast-duration, 5000ms) linear forwards;
+    }
+
+    /* Pausing on hover gives the reader time to finish, and to click through. */
+    .me-toast:hover .me-toast__progress,
+    .me-toast:focus-within .me-toast__progress {
+        animation-play-state: paused;
+    }
+
+    .me-toast[data-closing='true'] {
+        animation: me-toast-out 160ms ease-in forwards;
+    }
+
+    /* Role variants */
+    .me-toast--success {
+        --me-toast-accent: var(--color-success-600);
+        --me-toast-soft: var(--me-success-soft);
+    }
+
+    .me-toast--danger {
+        --me-toast-accent: var(--color-danger-600);
+        --me-toast-soft: var(--me-danger-soft);
+    }
+
+    .me-toast--warning {
+        --me-toast-accent: var(--color-warning-500);
+        --me-toast-soft: var(--me-warning-soft);
+    }
+
+    .me-toast--info {
+        --me-toast-accent: var(--color-info-600);
+        --me-toast-soft: var(--me-info-soft);
+    }
+
+    .me-toast--primary {
+        --me-toast-accent: var(--color-primary-600);
+        --me-toast-soft: var(--me-primary-soft);
+    }
+
+    /*
+     * Entry direction follows the container's edge, so a toast slides in from
+     * the side of the screen it belongs to.
+     */
+    @keyframes me-toast-in {
+        from {
+            opacity: 0;
+            transform: translateY(-0.5rem) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .me-toasts[data-position^='bottom'] .me-toast {
+        animation-name: me-toast-in-bottom;
+    }
+
+    @keyframes me-toast-in-bottom {
+        from {
+            opacity: 0;
+            transform: translateY(0.5rem) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes me-toast-out {
+        to {
+            opacity: 0;
+            transform: scale(0.97);
+            /* Collapsing the box lets the rest of the stack close the gap. */
+            max-height: 0;
+            margin-block: -0.25rem;
+            padding-block: 0;
+        }
+    }
+
+    @keyframes me-toast-drain {
+        from {
+            transform: scaleX(1);
+        }
+        to {
+            transform: scaleX(0);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .me-toast {
+            animation: none;
+        }
+
+        .me-toast[data-closing='true'] {
+            animation: me-toast-out 1ms linear forwards;
+        }
+    }
+}

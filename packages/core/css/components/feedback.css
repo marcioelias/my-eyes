@@ -1,0 +1,183 @@
+/*
+ * Alerts and badges. Both are tinted rather than saturated: the role colour
+ * shows up in the icon, the border and a light wash, so a page full of status
+ * messages still reads calmly.
+ */
+@layer components {
+    .me-alert {
+        --me-alert-bg: var(--color-surface-muted);
+        --me-alert-line: var(--color-line);
+        --me-alert-accent: var(--color-content-muted);
+
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--me-alert-line);
+        border-radius: var(--me-radius);
+        background-color: var(--me-alert-bg);
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        color: var(--color-content);
+    }
+
+    .me-alert__icon {
+        flex-shrink: 0;
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--me-alert-accent);
+    }
+
+    .me-alert__body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+    }
+
+    .me-alert__title {
+        font-weight: 600;
+        color: var(--color-content);
+    }
+
+    .me-alert__text {
+        color: var(--color-content-muted);
+    }
+
+    .me-alert__dismiss {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        margin: -0.125rem;
+        border: 0;
+        border-radius: var(--me-radius-sm);
+        background: none;
+        cursor: pointer;
+        color: var(--color-content-subtle);
+        transition:
+            background-color var(--me-transition),
+            color var(--me-transition);
+    }
+
+    .me-alert__dismiss:hover {
+        background-color: color-mix(in oklch, var(--color-content) 8%, transparent);
+        color: var(--color-content);
+    }
+
+    .me-alert__dismiss svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .me-alert--primary {
+        --me-alert-bg: var(--me-primary-soft);
+        --me-alert-line: var(--me-primary-soft-line);
+        --me-alert-accent: var(--me-primary-accent);
+    }
+
+    .me-alert--success {
+        --me-alert-bg: var(--me-success-soft);
+        --me-alert-line: var(--me-success-soft-line);
+        --me-alert-accent: var(--me-success-accent);
+    }
+
+    .me-alert--danger {
+        --me-alert-bg: var(--me-danger-soft);
+        --me-alert-line: var(--me-danger-soft-line);
+        --me-alert-accent: var(--me-danger-accent);
+    }
+
+    .me-alert--warning {
+        --me-alert-bg: var(--me-warning-soft);
+        --me-alert-line: var(--me-warning-soft-line);
+        --me-alert-accent: var(--me-warning-accent);
+    }
+
+    .me-alert--info {
+        --me-alert-bg: var(--me-info-soft);
+        --me-alert-line: var(--me-info-soft-line);
+        --me-alert-accent: var(--me-info-accent);
+    }
+
+    /* Badge */
+    .me-badge {
+        --me-badge-bg: var(--color-surface-muted);
+        --me-badge-fg: var(--color-content-muted);
+        --me-badge-line: transparent;
+
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.125rem 0.5rem;
+        border: 1px solid var(--me-badge-line);
+        border-radius: var(--me-radius-full);
+        background-color: var(--me-badge-bg);
+        color: var(--me-badge-fg);
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 1.125rem;
+        white-space: nowrap;
+    }
+
+    .me-badge--primary {
+        --me-badge-bg: var(--me-primary-soft);
+        --me-badge-fg: var(--me-primary-accent);
+        --me-badge-line: var(--me-primary-soft-line);
+    }
+
+    .me-badge--success {
+        --me-badge-bg: var(--me-success-soft);
+        --me-badge-fg: var(--me-success-accent);
+        --me-badge-line: var(--me-success-soft-line);
+    }
+
+    .me-badge--danger {
+        --me-badge-bg: var(--me-danger-soft);
+        --me-badge-fg: var(--me-danger-accent);
+        --me-badge-line: var(--me-danger-soft-line);
+    }
+
+    .me-badge--warning {
+        --me-badge-bg: var(--me-warning-soft);
+        --me-badge-fg: var(--me-warning-accent);
+        --me-badge-line: var(--me-warning-soft-line);
+    }
+
+    .me-badge--info {
+        --me-badge-bg: var(--me-info-soft);
+        --me-badge-fg: var(--me-info-accent);
+        --me-badge-line: var(--me-info-soft-line);
+    }
+
+    /* Solid badges, for counts on a coloured surface. */
+    .me-badge--solid {
+        --me-badge-bg: var(--color-primary-600);
+        --me-badge-fg: #fff;
+        --me-badge-line: transparent;
+    }
+
+    /* A small status dot, for "online" or unread markers. */
+    .me-dot {
+        display: inline-block;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: var(--me-radius-full);
+        background-color: var(--color-content-subtle);
+    }
+
+    .me-dot--success {
+        background-color: var(--color-success-500);
+    }
+
+    .me-dot--danger {
+        background-color: var(--color-danger-500);
+    }
+
+    .me-dot--warning {
+        background-color: var(--color-warning-500);
+    }
+}

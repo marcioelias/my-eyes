@@ -1,0 +1,425 @@
+/*
+ * Admin shell: sidebar + topbar + content + optional footer.
+ *
+ * Mobile first. The base rules describe the phone layout — the sidebar is an
+ * off-canvas drawer sitting above the page — and a single min-width block
+ * promotes it to a permanent column. State lives in two data attributes on
+ * .me-shell so both the drawer and the collapsed rail are driven from one place:
+ *
+ *   data-sidebar-open      "true" while the mobile drawer is showing
+ *   data-sidebar-collapsed "true" while the desktop rail is icon-only
+ */
+@layer components {
+    .me-shell {
+        display: grid;
+        grid-template-columns: 1fr;
+        min-height: 100dvh;
+        background-color: var(--color-surface);
+    }
+
+    .me-shell__overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 30;
+        background-color: rgb(15 23 42 / 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition:
+            opacity var(--me-transition),
+            visibility var(--me-transition);
+    }
+
+    .me-shell[data-sidebar-open='true'] .me-shell__overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .me-sidebar {
+        position: fixed;
+        inset-block: 0;
+        inset-inline-start: 0;
+        z-index: 40;
+        display: flex;
+        flex-direction: column;
+        width: var(--me-sidebar-width);
+        max-width: 85vw;
+        background-color: var(--color-surface-raised);
+        border-inline-end: 1px solid var(--color-line);
+        transform: translateX(-100%);
+        transition: transform var(--me-transition);
+    }
+
+    .me-sidebar:dir(rtl) {
+        transform: translateX(100%);
+    }
+
+    .me-shell[data-sidebar-open='true'] .me-sidebar {
+        transform: translateX(0);
+    }
+
+    .me-sidebar__header {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        height: var(--me-topbar-height);
+        flex-shrink: 0;
+        padding-inline: 1rem;
+        border-bottom: 1px solid var(--color-line);
+    }
+
+    .me-sidebar__brand {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        min-width: 0;
+        font-weight: 600;
+        color: var(--color-content);
+        text-decoration: none;
+    }
+
+    .me-sidebar__brand svg,
+    .me-sidebar__brand img {
+        width: 1.75rem;
+        height: 1.75rem;
+        flex-shrink: 0;
+    }
+
+    .me-sidebar__body {
+        flex: 1;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 0.75rem;
+    }
+
+    .me-sidebar__footer {
+        flex-shrink: 0;
+        border-top: 1px solid var(--color-line);
+        padding: 0.75rem;
+    }
+
+    /* Close button — drawer only, hidden once the sidebar is permanent. */
+    .me-sidebar__close {
+        margin-inline-start: auto;
+    }
+
+    .me-shell__main {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 100dvh;
+    }
+
+    .me-topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        height: var(--me-topbar-height);
+        flex-shrink: 0;
+        padding-inline: 0.75rem;
+        background-color: color-mix(in oklch, var(--color-surface-raised) 85%, transparent);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--color-line);
+    }
+
+    .me-topbar__title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--color-content);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Pushes everything after it to the far end of the bar. */
+    .me-topbar__spacer {
+        flex: 1;
+    }
+
+    .me-content {
+        flex: 1;
+        padding: 1rem;
+    }
+
+    .me-content__header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .me-content__heading {
+        font-size: 1.25rem;
+        font-weight: 600;
+        line-height: 1.75rem;
+        color: var(--color-content);
+    }
+
+    .me-content__subheading {
+        font-size: 0.875rem;
+        color: var(--color-content-muted);
+        margin-top: 0.125rem;
+    }
+
+    .me-content__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .me-content__status {
+        margin-bottom: 1rem;
+    }
+
+    .me-footer {
+        flex-shrink: 0;
+        padding: 1rem;
+        border-top: 1px solid var(--color-line);
+        font-size: 0.8125rem;
+        color: var(--color-content-muted);
+    }
+
+    .me-footer__inner {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+        text-align: center;
+    }
+
+    /* Hidden on desktop, where the sidebar is always present. */
+    .me-shell__toggle {
+        display: inline-flex;
+    }
+
+    @media (min-width: 1024px) {
+        .me-shell {
+            grid-template-columns: var(--me-sidebar-width) 1fr;
+            transition: grid-template-columns var(--me-transition);
+        }
+
+        .me-shell[data-sidebar-collapsed='true'] {
+            grid-template-columns: var(--me-sidebar-width-collapsed) 1fr;
+        }
+
+        .me-sidebar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            height: 100dvh;
+            max-width: none;
+            width: auto;
+            transform: none;
+        }
+
+        .me-sidebar:dir(rtl) {
+            transform: none;
+        }
+
+        .me-shell__overlay,
+        .me-sidebar__close,
+        .me-shell__toggle {
+            display: none;
+        }
+
+        .me-topbar {
+            padding-inline: 1.5rem;
+        }
+
+        .me-content {
+            padding: 1.5rem;
+        }
+
+        .me-footer {
+            padding-inline: 1.5rem;
+        }
+
+        .me-content__header {
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .me-footer__inner {
+            flex-direction: row;
+            justify-content: space-between;
+            text-align: start;
+        }
+
+        /* Collapsed rail: only icons survive. */
+        .me-shell[data-sidebar-collapsed='true'] .me-sidebar__header {
+            justify-content: center;
+            padding-inline: 0.5rem;
+        }
+
+        .me-shell[data-sidebar-collapsed='true'] .me-hide-collapsed {
+            display: none;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .me-sidebar,
+        .me-shell,
+        .me-shell__overlay {
+            transition: none;
+        }
+    }
+
+    /* Centred layout for auth screens — login, register, reset. */
+    .me-auth {
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 1rem;
+        background-color: var(--color-surface);
+    }
+
+    .me-auth__panel {
+        width: 100%;
+        max-width: 25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .me-auth__brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.625rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--color-content);
+        text-decoration: none;
+    }
+
+    .me-auth__brand svg,
+    .me-auth__brand img {
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .me-auth__heading {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-content);
+        text-align: center;
+    }
+
+    .me-auth__subheading {
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: var(--color-content-muted);
+        text-align: center;
+    }
+
+    .me-auth__footer {
+        text-align: center;
+        font-size: 0.875rem;
+        color: var(--color-content-muted);
+    }
+
+    /*
+     * Error pages (404, 500, ...). Same centred frame as auth, but the status
+     * code is the visual anchor. It uses the role accent rather than a flat
+     * grey, so a 500 reads as an error and a 404 as a dead end without the page
+     * turning into a wall of colour.
+     */
+    .me-error-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100dvh;
+        padding: 2rem 1rem;
+        text-align: center;
+        background-color: var(--color-surface);
+    }
+
+    .me-error-page__panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        max-width: 32rem;
+    }
+
+    .me-error-page__badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: var(--me-radius-full);
+        background-color: var(--me-error-soft, var(--me-secondary-soft));
+        color: var(--me-error-accent, var(--color-content-muted));
+    }
+
+    .me-error-page__badge svg {
+        width: 1.75rem;
+        height: 1.75rem;
+    }
+
+    .me-error-page__status {
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--me-error-accent, var(--color-content));
+    }
+
+    .me-error-page__title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-content);
+    }
+
+    .me-error-page__text {
+        font-size: 0.9375rem;
+        line-height: 1.5rem;
+        color: var(--color-content-muted);
+    }
+
+    .me-error-page__actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .me-error-page__meta {
+        margin-top: 1rem;
+        font-size: 0.75rem;
+        color: var(--color-content-subtle);
+    }
+
+    /*
+     * Severity is set by a modifier so every 4xx/5xx view is the same markup
+     * with a different role colour.
+     */
+    .me-error-page--info {
+        --me-error-soft: var(--me-info-soft);
+        --me-error-accent: var(--me-info-accent);
+    }
+
+    .me-error-page--warning {
+        --me-error-soft: var(--me-warning-soft);
+        --me-error-accent: var(--me-warning-accent);
+    }
+
+    .me-error-page--danger {
+        --me-error-soft: var(--me-danger-soft);
+        --me-error-accent: var(--me-danger-accent);
+    }
+
+    @media (min-width: 640px) {
+        .me-error-page__status {
+            font-size: 4rem;
+        }
+    }
+}

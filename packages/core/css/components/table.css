@@ -1,0 +1,310 @@
+/*
+ * Data table.
+ *
+ * Structure: a bordered shell holds a toolbar (search, filters, page size), a
+ * horizontally scrollable viewport, and a footer with the range and pagination.
+ * Only the viewport scrolls, so the toolbar and pagination stay put on narrow
+ * screens instead of sliding off with the columns.
+ */
+@layer components {
+    .me-table-shell {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius-lg);
+        background-color: var(--color-surface-raised);
+        box-shadow: var(--me-shadow-sm);
+        overflow: hidden;
+    }
+
+    .me-table-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--color-line);
+    }
+
+    .me-table-toolbar__row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .me-table-toolbar__search {
+        flex: 1;
+        min-width: 12rem;
+    }
+
+    .me-table-toolbar__spacer {
+        flex: 1;
+    }
+
+    /* The scroll container. */
+    .me-table-viewport {
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+    }
+
+    .me-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+
+    .me-table th,
+    .me-table td {
+        padding: 0.75rem 1rem;
+        text-align: start;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    /*
+     * Sticky header. It needs a solid background — a transparent one would let
+     * rows show through as they scroll underneath.
+     */
+    .me-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: var(--color-surface-muted);
+        border-bottom: 1px solid var(--color-line);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--color-content-muted);
+        user-select: none;
+    }
+
+    .me-table tbody td {
+        border-bottom: 1px solid var(--color-line);
+        color: var(--color-content);
+    }
+
+    .me-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .me-table tbody tr {
+        transition: background-color var(--me-transition);
+    }
+
+    .me-table tbody tr:hover {
+        background-color: var(--color-surface-muted);
+    }
+
+    .me-table--striped tbody tr:nth-child(even) {
+        background-color: color-mix(in oklch, var(--color-surface-muted) 45%, transparent);
+    }
+
+    .me-table--striped tbody tr:nth-child(even):hover {
+        background-color: var(--color-surface-muted);
+    }
+
+    /* Denser variant for tables that live inside a panel. */
+    .me-table--compact th,
+    .me-table--compact td {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .me-table__cell--end {
+        text-align: end;
+    }
+
+    .me-table__cell--center {
+        text-align: center;
+    }
+
+    /* Digits must line up when they sit in a column. */
+    .me-table__cell--end,
+    .me-table__cell--numeric {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /*
+     * A cell that may hold long free text opts out of nowrap and gets a ceiling,
+     * so one long value cannot stretch the table past the viewport.
+     */
+    .me-table__cell--wrap {
+        white-space: normal;
+        min-width: 12rem;
+        max-width: 24rem;
+    }
+
+    /* Sort control — the whole header cell is the hit area. */
+    .me-table__sort {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        width: 100%;
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        text-decoration: none;
+        cursor: pointer;
+        border-radius: var(--me-radius-sm);
+        transition: color var(--me-transition);
+    }
+
+    .me-table__sort:hover {
+        color: var(--color-content);
+    }
+
+    .me-table__cell--end .me-table__sort {
+        justify-content: flex-end;
+    }
+
+    .me-table__sort-icon {
+        width: 0.875rem;
+        height: 0.875rem;
+        flex-shrink: 0;
+        opacity: 0;
+        transition:
+            opacity var(--me-transition),
+            transform var(--me-transition);
+    }
+
+    /* Hint the affordance on hover, commit to it once sorted. */
+    .me-table__sort:hover .me-table__sort-icon {
+        opacity: 0.45;
+    }
+
+    .me-table__sort[aria-sort] {
+        color: var(--me-primary-accent);
+    }
+
+    .me-table__sort[aria-sort] .me-table__sort-icon {
+        opacity: 1;
+    }
+
+    .me-table__sort[aria-sort='descending'] .me-table__sort-icon {
+        transform: rotate(180deg);
+    }
+
+    .me-table-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: center;
+        padding: 0.75rem;
+        border-top: 1px solid var(--color-line);
+        font-size: 0.8125rem;
+        color: var(--color-content-muted);
+    }
+
+    .me-table-footer__count {
+        font-variant-numeric: tabular-nums;
+    }
+
+    @media (min-width: 640px) {
+        .me-table-toolbar {
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .me-table-footer {
+            flex-direction: row;
+            justify-content: space-between;
+        }
+    }
+
+    /*
+     * Row entry animation.
+     *
+     * The delay is driven by --me-row, set per row, and capped so a 100-row
+     * page does not spend two seconds animating. `backwards` keeps rows hidden
+     * during their delay rather than flashing in first.
+     */
+    .me-table tbody tr {
+        animation: me-row-in 260ms ease-out backwards;
+        animation-delay: calc(min(var(--me-row, 0) * 22ms, 400ms));
+    }
+
+    @keyframes me-row-in {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .me-table tbody tr {
+            animation: none;
+        }
+    }
+
+    /* Pagination */
+    .me-pagination {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .me-pagination__item {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        height: 2rem;
+        padding-inline: 0.5rem;
+        border: 1px solid transparent;
+        border-radius: var(--me-radius-sm);
+        background: none;
+        font-size: 0.8125rem;
+        font-variant-numeric: tabular-nums;
+        color: var(--color-content-muted);
+        text-decoration: none;
+        transition:
+            background-color var(--me-transition),
+            color var(--me-transition),
+            border-color var(--me-transition);
+    }
+
+    .me-pagination__item:hover {
+        background-color: var(--color-surface-muted);
+        color: var(--color-content);
+    }
+
+    .me-pagination__item[aria-current='page'] {
+        background-color: var(--me-primary-soft);
+        border-color: var(--me-primary-soft-line);
+        color: var(--me-primary-accent);
+        font-weight: 600;
+    }
+
+    .me-pagination__item[aria-disabled='true'] {
+        opacity: 0.45;
+        pointer-events: none;
+    }
+
+    .me-pagination__item svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .me-pagination__gap {
+        padding-inline: 0.25rem;
+        color: var(--color-content-subtle);
+    }
+
+    /*
+     * On phones the numbered pages are dropped — only prev/next and the current
+     * position remain, which is all that fits without wrapping.
+     */
+    @media (max-width: 639px) {
+        .me-pagination__item--number,
+        .me-pagination__gap {
+            display: none;
+        }
+    }
+}

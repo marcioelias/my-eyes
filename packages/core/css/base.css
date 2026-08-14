@@ -1,0 +1,66 @@
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        background-color: var(--color-surface);
+        color: var(--color-content);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /*
+     * Borderless elements get a detached ring. Bordered form controls are
+     * handled in components/focus.css, where the border itself thickens
+     * instead — an offset ring beside an existing border reads as two lines.
+     */
+    :where(a, button, summary, [tabindex]):focus-visible {
+        outline: var(--me-ring-width) solid var(--me-focus);
+        outline-offset: var(--me-ring-offset);
+    }
+
+    ::placeholder {
+        color: var(--color-content-subtle);
+    }
+
+    /* Native controls inherit the brand colour instead of the UA blue. */
+    :where(input, textarea, select) {
+        accent-color: var(--color-primary-600);
+    }
+}
+
+@layer components {
+    /* Visible only to screen readers, until focused. */
+    .me-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border-width: 0;
+    }
+
+    .me-skip-link {
+        position: absolute;
+        left: 0.5rem;
+        top: 0.5rem;
+        z-index: 100;
+        transform: translateY(-200%);
+        border-radius: var(--me-radius);
+        background-color: var(--color-primary-600);
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-white);
+        transition: transform var(--me-transition);
+    }
+
+    .me-skip-link:focus {
+        transform: translateY(0);
+    }
+}

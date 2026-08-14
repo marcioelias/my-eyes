@@ -1,0 +1,178 @@
+/*
+ * Confirmation modal.
+ *
+ * Built on the native <dialog> element, so the backdrop, Escape handling, focus
+ * trapping and inertness of the page behind it come from the browser rather
+ * than from JavaScript that has to be kept correct.
+ *
+ * The role colour drives the icon and the confirm button together, so a
+ * destructive confirmation reads as destructive without any extra markup.
+ */
+@layer components {
+    .me-modal {
+        --me-modal-accent: var(--me-primary-accent);
+        --me-modal-soft: var(--me-primary-soft);
+
+        padding: 0;
+        border: 0;
+        background: transparent;
+        max-width: min(28rem, calc(100vw - 2rem));
+        width: 100%;
+        color: var(--color-content);
+        overflow: visible;
+
+        /*
+         * Centred in the viewport. The UA stylesheet already does this through
+         * `margin: auto` on a modal dialog, but it is stated here so a stray
+         * `margin` utility on the element cannot knock it off centre.
+         */
+        margin: auto;
+    }
+
+    .me-modal::backdrop {
+        background-color: var(--me-backdrop);
+        backdrop-filter: blur(2px);
+    }
+
+    .me-modal[open] {
+        animation: me-modal-in 180ms ease-out;
+    }
+
+    .me-modal[open]::backdrop {
+        animation: me-backdrop-in 180ms ease-out;
+    }
+
+    .me-modal__panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.25rem;
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius-lg);
+        background-color: var(--color-surface-raised);
+        box-shadow: var(--me-shadow-lg);
+        text-align: center;
+    }
+
+    .me-modal__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        margin-inline: auto;
+        border-radius: var(--me-radius-full);
+        background-color: var(--me-modal-soft);
+        color: var(--me-modal-accent);
+    }
+
+    .me-modal__icon svg {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .me-modal__title {
+        font-size: 1.0625rem;
+        font-weight: 600;
+        line-height: 1.5rem;
+        color: var(--color-content);
+        text-wrap: balance;
+    }
+
+    .me-modal__text {
+        font-size: 0.875rem;
+        line-height: 1.375rem;
+        color: var(--color-content-muted);
+    }
+
+    /*
+     * Stacked on phones with the confirm action on top — the easiest target for
+     * a thumb — and side by side from small tablets up.
+     */
+    .me-modal__actions {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 0.5rem;
+    }
+
+    .me-modal__actions .me-btn {
+        width: 100%;
+    }
+
+    @media (min-width: 480px) {
+        .me-modal__actions {
+            flex-direction: row;
+            justify-content: center;
+        }
+
+        .me-modal__actions .me-btn {
+            width: auto;
+            min-width: 7rem;
+        }
+    }
+
+    /* Role variants */
+    .me-modal--danger {
+        --me-modal-accent: var(--me-danger-accent);
+        --me-modal-soft: var(--me-danger-soft);
+    }
+
+    .me-modal--warning {
+        --me-modal-accent: var(--me-warning-accent);
+        --me-modal-soft: var(--me-warning-soft);
+    }
+
+    .me-modal--success {
+        --me-modal-accent: var(--me-success-accent);
+        --me-modal-soft: var(--me-success-soft);
+    }
+
+    .me-modal--info {
+        --me-modal-accent: var(--me-info-accent);
+        --me-modal-soft: var(--me-info-soft);
+    }
+
+    /* Left-aligned variant, for modals carrying a form rather than a question. */
+    .me-modal--start .me-modal__panel {
+        text-align: start;
+    }
+
+    .me-modal--start .me-modal__icon {
+        margin-inline: 0;
+    }
+
+    .me-modal--start .me-modal__actions {
+        justify-content: flex-end;
+    }
+
+    .me-modal--lg {
+        max-width: min(40rem, calc(100vw - 2rem));
+    }
+
+    @keyframes me-modal-in {
+        from {
+            opacity: 0;
+            transform: translateY(8px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes me-backdrop-in {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .me-modal[open],
+        .me-modal[open]::backdrop {
+            animation: none;
+        }
+    }
+}

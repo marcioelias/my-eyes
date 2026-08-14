@@ -1,0 +1,163 @@
+/*
+ * File upload: a dropzone that is also a plain label wrapping a native file
+ * input. Clicking and keyboard activation therefore work with no JS at all —
+ * the JS only adds drag-and-drop, the file list and client-side validation.
+ */
+@layer components {
+    .me-upload {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .me-upload__zone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 8rem;
+        padding: 1.25rem 1rem;
+        border: 1px dashed var(--color-line-strong);
+        border-radius: var(--me-radius);
+        background-color: var(--color-surface-raised);
+        text-align: center;
+        cursor: pointer;
+        transition:
+            border-color var(--me-transition),
+            background-color var(--me-transition);
+    }
+
+    .me-upload__zone:hover {
+        border-color: var(--color-primary-400);
+        background-color: var(--me-primary-soft);
+    }
+
+    /* Set by the JS binding while a drag hovers the zone. */
+    .me-upload__zone[data-dragging='true'] {
+        border-color: var(--color-primary-500);
+        background-color: var(--me-primary-soft-hover);
+    }
+
+    .me-upload__zone[data-disabled='true'] {
+        cursor: not-allowed;
+        opacity: 0.6;
+        background-color: var(--color-surface-muted);
+    }
+
+    .me-upload__input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .me-upload__icon {
+        width: 1.75rem;
+        height: 1.75rem;
+        color: var(--color-content-subtle);
+    }
+
+    .me-upload__title {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-content);
+    }
+
+    .me-upload__title em {
+        font-style: normal;
+        color: var(--me-primary-accent);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    .me-upload__hint {
+        font-size: 0.8125rem;
+        color: var(--color-content-muted);
+    }
+
+    .me-upload__list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .me-upload__item {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        padding: 0.5rem 0.625rem;
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius);
+        background-color: var(--color-surface-raised);
+        font-size: 0.875rem;
+    }
+
+    .me-upload__item[data-invalid='true'] {
+        border-color: var(--me-danger-soft-line);
+        background-color: var(--me-danger-soft);
+    }
+
+    .me-upload__preview {
+        width: 2.25rem;
+        height: 2.25rem;
+        flex-shrink: 0;
+        border-radius: var(--me-radius-sm);
+        object-fit: cover;
+        background-color: var(--color-surface-muted);
+    }
+
+    .me-upload__item-body {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .me-upload__name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--color-content);
+    }
+
+    .me-upload__meta {
+        font-size: 0.75rem;
+        color: var(--color-content-muted);
+    }
+
+    .me-upload__item[data-invalid='true'] .me-upload__meta {
+        color: var(--me-danger-accent);
+    }
+
+    .me-upload__remove {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border: 0;
+        border-radius: var(--me-radius-sm);
+        background: none;
+        cursor: pointer;
+        color: var(--color-content-subtle);
+        transition:
+            background-color var(--me-transition),
+            color var(--me-transition);
+    }
+
+    .me-upload__remove:hover {
+        background-color: var(--color-surface-muted);
+        color: var(--me-danger-accent);
+    }
+
+    .me-upload__remove svg {
+        width: 1rem;
+        height: 1rem;
+    }
+}

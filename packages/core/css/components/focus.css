@@ -1,0 +1,85 @@
+/*
+ * Focus treatment for bordered controls.
+ *
+ * A 2px outline offset from a control that already has a 1px border reads as
+ * two separate lines. Instead the border itself grows to 2px and a soft halo
+ * sits directly against it.
+ *
+ * The extra pixel comes from an inset box-shadow rather than a wider
+ * border-width: changing the border on focus would resize the box and shift
+ * everything beside it by a pixel.
+ *
+ * --me-focus is read (not hardcoded) so a control can redirect the whole
+ * treatment by redefining it — which is how invalid fields focus in red.
+ *
+ * Imported last so it wins over the per-component rules regardless of the
+ * order the component files happen to be in.
+ */
+
+@layer components {
+    .me-input:focus,
+    .me-upload__zone:focus-within,
+    .me-check:focus-visible,
+    .me-radio:focus-visible {
+        outline: none;
+        border-color: var(--me-focus);
+        box-shadow:
+            inset 0 0 0 1px var(--me-focus),
+            0 0 0 var(--me-focus-halo-width) var(--me-focus-halo);
+    }
+
+    /*
+     * The input group needs the inner line drawn by an overlay instead of an
+     * inset shadow on the group itself.
+     *
+     * Painting order is: element background, then inset shadows, then children.
+     * An addon with a solid background (the "R$" segment, the stepper) would
+     * therefore sit on top of the focus line and cut it on that side. A pseudo
+     * element is the group's last child, so it paints above every addon.
+     */
+    .me-input-group::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        box-shadow: inset 0 0 0 1px transparent;
+        transition: box-shadow var(--me-transition);
+    }
+
+    .me-input-group:focus-within {
+        border-color: var(--me-focus);
+        box-shadow: 0 0 0 var(--me-focus-halo-width) var(--me-focus-halo);
+    }
+
+    .me-input-group:focus-within::after {
+        box-shadow: inset 0 0 0 1px var(--me-focus);
+    }
+
+    /*
+     * The switch track has no border, so an inset line would read as a stroke
+     * inside the pill. It takes the halo only.
+     */
+    .me-switch__input:focus-visible + .me-switch__track {
+        outline: none;
+        box-shadow: 0 0 0 var(--me-focus-halo-width) var(--me-focus-halo);
+    }
+
+    /* Invalid controls focus in danger, including the halo. */
+    .me-input[aria-invalid='true'],
+    .me-check[aria-invalid='true'],
+    .me-radio[aria-invalid='true'],
+    .me-input-group:has(.me-input[aria-invalid='true']) {
+        --me-focus: var(--color-danger-500);
+    }
+
+    /*
+     * Inside a group the wrapper owns the focus treatment, so the inner input
+     * must not draw its own.
+     */
+    .me-input-group > .me-input:focus {
+        outline: none;
+        border-color: transparent;
+        box-shadow: none;
+    }
+}
