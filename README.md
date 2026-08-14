@@ -52,9 +52,10 @@ change and a pile of utility classes you have to re-type on every project.
 
 | | |
 |---|---|
-| PHP | 8.2+ |
-| Laravel | 11 or 12 |
+| PHP | 8.2+ (8.3+ on Laravel 13) |
+| Laravel | 11, 12 or 13 |
 | Tailwind CSS | 4 |
+| Livewire | 3 or 4 (optional) |
 
 ## Install
 

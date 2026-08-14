@@ -63,10 +63,21 @@ export function startMyEyes(): void {
     document.addEventListener('livewire:navigated', run)
     document.addEventListener('turbo:load', run)
 
-    // Livewire 3 fires this after every component re-render.
+    /*
+     * Re-run after a Livewire re-render. The hook name differs between
+     * Livewire 3 and 4, so both are attempted and an unknown one is ignored —
+     * the bindings are idempotent, so registering twice is harmless while
+     * registering none would leave a swapped-in component unwired.
+     */
     document.addEventListener('livewire:initialized', () => {
         const livewire = (window as { Livewire?: { hook: (name: string, callback: () => void) => void } }).Livewire
 
-        livewire?.hook('morph.updated', run)
+        for (const hook of ['morph.updated', 'morphed', 'commit']) {
+            try {
+                livewire?.hook(hook, run)
+            } catch {
+                // Not a hook this Livewire version knows; the others cover it.
+            }
+        }
     })
 }

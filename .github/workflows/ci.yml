@@ -45,18 +45,19 @@ jobs:
         run: test "$(wc -c < packages/core/tests/out.css)" -gt 10000
 
   laravel:
-    name: Laravel (PHP ${{ matrix.php }}, ${{ matrix.dependencies }})
+    name: PHP ${{ matrix.php }} · Laravel ${{ matrix.laravel }} ${{ matrix.dependencies }}
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
-        dependencies: [highest]
         include:
-          # Guards against relying on a version newer than composer.json allows.
-          - php: '8.2'
-            dependencies: lowest
+          - { php: '8.2', laravel: '11.*', dependencies: highest }
+          - { php: '8.3', laravel: '12.*', dependencies: highest }
+          - { php: '8.4', laravel: '13.*', dependencies: highest }
+          - { php: '8.5', laravel: '13.*', dependencies: highest }
+          # Catches accidental reliance on a version newer than composer.json allows.
+          - { php: '8.2', laravel: '11.*', dependencies: lowest }
 
     steps:
       - uses: actions/checkout@v4
@@ -67,15 +68,26 @@ jobs:
           extensions: mbstring, sqlite3, pdo_sqlite
           coverage: none
 
+      - name: Pin the Laravel version under test
+        run: >
+          composer require
+          "illuminate/support:${{ matrix.laravel }}"
+          "illuminate/view:${{ matrix.laravel }}"
+          --no-interaction --no-update
+
       - name: Install dependencies
         uses: ramsey/composer-install@v3
         with:
           dependency-versions: ${{ matrix.dependencies }}
 
+      # Skipped on the lowest run: it resolves the oldest Pint and PHPStan too,
+      # and those tools' minimum versions say nothing about this package.
       - name: Lint
+        if: matrix.dependencies != 'lowest'
         run: vendor/bin/pint --test
 
       - name: Static analysis
+        if: matrix.dependencies != 'lowest'
         run: vendor/bin/phpstan analyse --no-progress
 
       - name: Tests
