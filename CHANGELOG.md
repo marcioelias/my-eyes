@@ -27,4 +27,11 @@ All notable changes to this project are documented here. The format follows
   password confirmation, dashboard, profile) and 4xx/5xx error pages.
 - Standalone browser bundle for projects without a bundler.
 
+### Notes
+
+- Requires Laravel 12.61.1+ or 13.12.0+. Every Laravel 11 release carries an
+  unpatched security advisory, and 12.x was only patched in 12.61.1, so
+  Composer refuses to install the earlier versions — supporting them would
+  produce an unsolvable dependency set rather than a working install.
+
 [Unreleased]: https://github.com/marcioelias/my-eyes/commits/main

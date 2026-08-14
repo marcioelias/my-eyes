@@ -52,12 +52,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { php: '8.2', laravel: '11.*', dependencies: highest }
+          - { php: '8.2', laravel: '12.*', dependencies: highest }
           - { php: '8.3', laravel: '12.*', dependencies: highest }
           - { php: '8.4', laravel: '13.*', dependencies: highest }
           - { php: '8.5', laravel: '13.*', dependencies: highest }
           # Catches accidental reliance on a version newer than composer.json allows.
-          - { php: '8.2', laravel: '11.*', dependencies: lowest }
+          - { php: '8.2', laravel: '12.*', dependencies: lowest }
 
     steps:
       - uses: actions/checkout@v4
