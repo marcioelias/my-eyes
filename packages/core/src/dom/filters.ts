@@ -123,20 +123,22 @@ function setup(container: HTMLElement): void {
      * text, so the sentence still reads top to bottom.
      */
     const renderConjunction = (index: number): HTMLElement => {
-        if (index === 0) {
-            const label = document.createElement('span')
-            label.className = 'me-filters__conjunction'
-            label.textContent = labels.where
+        // Always the same cell element, whatever it holds — the grid column and
+        // the stacked mobile layout position it, and they should not need to
+        // know whether this row carries a word or a control.
+        const cell = document.createElement('span')
+        cell.className = 'me-filters__conjunction'
 
-            return label
+        if (index === 0) {
+            cell.textContent = labels.where
+
+            return cell
         }
 
         if (index > 1) {
-            const echo = document.createElement('span')
-            echo.className = 'me-filters__conjunction'
-            echo.textContent = conjunction === 'or' ? labels.or : labels.and
+            cell.textContent = conjunction === 'or' ? labels.or : labels.and
 
-            return echo
+            return cell
         }
 
         const select = createSelect(
@@ -154,7 +156,9 @@ function setup(container: HTMLElement): void {
             render()
         })
 
-        return select
+        cell.append(select)
+
+        return cell
     }
 
     const renderRow = (condition: FilterCondition, index: number): HTMLElement => {

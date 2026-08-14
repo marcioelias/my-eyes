@@ -52,16 +52,30 @@
     }
 
     .me-filters__conjunction-select {
-        /* Narrow enough to read as a connector, not as another field. */
-        width: auto;
-        min-width: 4.5rem;
+        width: 100%;
+        min-width: 0;
         padding-block: 0.25rem;
+
+        /*
+         * A tighter chevron than a normal select. The default reserves 2.25rem
+         * on the trailing edge, which on a two-letter word ("ou", "and") leaves
+         * the text cramped against the arrow.
+         */
+        padding-inline: 0.5rem 1.5rem;
+        background-position: right 0.375rem center;
+        background-size: 1rem 1rem;
+
         font-size: 0.8125rem;
         font-weight: 500;
         color: var(--me-primary-accent);
         background-color: var(--me-primary-soft);
         border-color: var(--me-primary-soft-line);
         box-shadow: none;
+    }
+
+    .me-filters__conjunction-select:dir(rtl) {
+        padding-inline: 1.5rem 0.5rem;
+        background-position: left 0.375rem center;
     }
 
     .me-filters__values {
@@ -159,8 +173,13 @@
 
     @media (min-width: 768px) {
         .me-filters__row {
-            /* conjunction / field / operator / values / remove */
-            grid-template-columns: 3.5rem minmax(8rem, 1fr) minmax(9rem, 1fr) minmax(10rem, 1.4fr) auto;
+            /*
+             * conjunction / field / operator / values / remove
+             *
+             * The first column has to fit a select, not just the word "Where" —
+             * sized for the control, since that is the wider of the two.
+             */
+            grid-template-columns: 5.25rem minmax(8rem, 1fr) minmax(9rem, 1fr) minmax(10rem, 1.4fr) auto;
             align-items: center;
             padding: 0.5rem;
         }
@@ -169,6 +188,11 @@
             min-height: 0;
             justify-content: flex-end;
             padding-inline-end: 0.25rem;
+        }
+
+        /* Rows that only show a word stay right-aligned against the field. */
+        .me-filters__conjunction:has(.me-filters__conjunction-select) {
+            padding-inline-end: 0.5rem;
         }
     }
 
@@ -187,6 +211,25 @@
             text-transform: uppercase;
             font-size: 0.6875rem;
             letter-spacing: 0.06em;
+        }
+
+        /*
+         * The row that carries the select needs more headroom and no uppercase
+         * treatment — it is a control, not a label.
+         */
+        .me-filters__row:has(.me-filters__conjunction-select) {
+            padding-top: 2.75rem;
+        }
+
+        .me-filters__conjunction:has(.me-filters__conjunction-select) {
+            top: 0.375rem;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .me-filters__conjunction-select {
+            width: auto;
+            min-width: 5rem;
         }
 
         .me-filters__remove {
