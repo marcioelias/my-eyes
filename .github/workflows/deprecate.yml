@@ -1,0 +1,55 @@
+name: Deprecate
+
+# Marks a published version as deprecated, so npm warns anyone installing it.
+#
+# Publishing runs from CI with NPM_TOKEN, which means no laptop needs to hold a
+# token that can change what is published. Deprecating is the same kind of
+# operation, so it lives here for the same reason.
+#
+# npm allows no unpublishing after 72 hours; deprecating is the only remedy
+# left for a version that turned out to be broken.
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Which npm package
+        required: true
+        type: choice
+        options:
+          - core
+          - vue
+      version:
+        description: 'Version or range, e.g. 0.2.0 or "<0.3.0"'
+        required: true
+        type: string
+      message:
+        description: Warning shown on install. Leave empty to undo a deprecation.
+        required: false
+        type: string
+        default: ''
+
+# Nothing in the repository is read or written; the token is the only credential.
+permissions: {}
+
+jobs:
+  deprecate:
+    name: ${{ inputs.message == '' && 'Undeprecate' || 'Deprecate' }} @my-eyes/${{ inputs.package }}@${{ inputs.version }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+
+      # The inputs go through the environment rather than being interpolated
+      # into the command: a message is free text, and free text in a shell line
+      # is a script injection waiting to happen.
+      - name: Apply
+        run: npm deprecate "@my-eyes/${PACKAGE}@${VERSION}" "${MESSAGE}"
+        env:
+          PACKAGE: ${{ inputs.package }}
+          VERSION: ${{ inputs.version }}
+          MESSAGE: ${{ inputs.message }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
