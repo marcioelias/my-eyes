@@ -15,8 +15,10 @@ export * from './headless/filters.js'
 export * from './headless/i18n.js'
 export * from './headless/numeric.js'
 export * from './headless/select.js'
+export * from './headless/table.js'
 export * from './headless/theme.js'
 export * from './headless/upload.js'
+export * from './headless/virtual.js'
 export { toast, type Toast, type ToastOptions, type ToastPosition, type ToastVariant } from './dom/toast.js'
 
 /**
