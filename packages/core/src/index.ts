@@ -21,6 +21,13 @@ export * from './headless/upload.js'
 export * from './headless/virtual.js'
 export { toast, type Toast, type ToastOptions, type ToastPosition, type ToastVariant } from './dom/toast.js'
 
+/*
+ * The filter builder binding, exported so the Vue and React panels can drive
+ * the same rows the Blade and Livewire ones do rather than reimplementing a
+ * condition row three more times.
+ */
+export { initFilterPanels, initFilters } from './dom/filters.js'
+
 /**
  * Wires every my-eyes behaviour inside `root`.
  *

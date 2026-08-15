@@ -128,7 +128,7 @@ export function createTableClient(options: TableClientOptions): TableClient {
      * quickly from 1 to 5 renders whichever response happens to land last.
      */
     let latest = 0
-    let destroyed = false
+    let inFlight = false
 
     const emit = (next: Partial<TableState>): void => {
         state = { ...state, ...next }
@@ -136,10 +136,6 @@ export function createTableClient(options: TableClientOptions): TableClient {
     }
 
     const load = (options: { cached?: boolean } = {}): void => {
-        if (destroyed) {
-            return
-        }
-
         const useCache = options.cached !== false
         const hit = useCache ? cache.get(query.page) : undefined
 
@@ -156,6 +152,7 @@ export function createTableClient(options: TableClientOptions): TableClient {
 
         const ticket = ++latest
 
+        inFlight = true
         emit({ status: 'loading', error: null })
 
         request(`${endpoint}${endpoint.includes('?') ? '&' : '?'}${buildQueryString(query, key)}`, {
@@ -171,16 +168,23 @@ export function createTableClient(options: TableClientOptions): TableClient {
             })
             .then((payload) => {
                 // A superseded request must not overwrite a newer one's result.
-                if (ticket !== latest || destroyed) {
+                if (ticket !== latest) {
                     return
                 }
 
+                inFlight = false
                 cache.set(payload.pagination.page, payload)
                 emit({ status: 'ready', payload, error: null })
                 writeUrl(payload)
             })
             .catch((error: unknown) => {
-                if (ticket !== latest || destroyed || isAbort(error)) {
+                if (ticket !== latest) {
+                    return
+                }
+
+                inFlight = false
+
+                if (isAbort(error)) {
                     return
                 }
 
@@ -218,9 +222,14 @@ export function createTableClient(options: TableClientOptions): TableClient {
         },
 
         start() {
-            // Idempotent: React Strict Mode mounts twice, and a second fetch of
-            // the same page would be wasted work.
-            if (state.status === 'idle') {
+            /*
+             * Idempotent, and deliberately phrased as "nothing to show and
+             * nothing on its way" rather than "status is idle": React Strict
+             * Mode mounts, tears down and remounts, which aborts the first
+             * request. Keying off the status alone would leave the table stuck
+             * on a request that was cancelled.
+             */
+            if (state.payload === null && !inFlight) {
                 load()
             }
         },
@@ -260,9 +269,14 @@ export function createTableClient(options: TableClientOptions): TableClient {
             load({ cached: false })
         },
 
+        /**
+         * Aborts what is in flight and drops the listeners. The client stays
+         * usable: a component that unmounts and mounts again — which is
+         * exactly what React Strict Mode does — resubscribes and carries on.
+         */
         destroy() {
-            destroyed = true
             controller?.abort()
+            inFlight = false
             listeners.clear()
         },
     }

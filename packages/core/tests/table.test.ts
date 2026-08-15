@@ -44,6 +44,25 @@ describe('fetching', () => {
         expect(client.getState().payload?.rows).toEqual([{ name: 'Row on page 1' }])
     })
 
+    it('recovers when a mount is torn down and remounted', async () => {
+        // React Strict Mode mounts, destroys and mounts again. The first
+        // request is aborted by the teardown, so the second mount has to issue
+        // a real one rather than wait on a cancelled promise.
+        const fetcher = vi.fn(async () => respond(payload(1)))
+        const client = createTableClient({ endpoint: '/table', fetcher, syncUrl: false })
+
+        client.start()
+        client.destroy()
+
+        const seen: string[] = []
+        client.subscribe((state) => seen.push(state.status))
+        client.start()
+        await settle()
+
+        expect(client.getState().status).toBe('ready')
+        expect(seen).toContain('ready')
+    })
+
     it('does not fetch twice when start is called twice', async () => {
         // React Strict Mode mounts every component twice.
         const fetcher = vi.fn(async () => respond(payload(1)))

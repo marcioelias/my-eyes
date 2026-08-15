@@ -1,11 +1,19 @@
 # Vue renderer
 
-Status: draft
+Status: implemented
 
 ## Purpose
 
-`@my-eyes/vue` — my-eyes components as Vue 3 SFCs, so a Vue frontend gets the
-same design system and the same table without reimplementing either.
+`@my-eyes/vue` — my-eyes components for Vue 3, so a Vue frontend gets the same
+design system and the same table without reimplementing either.
+
+Components are authored as `defineComponent` with render functions rather than
+as single-file components. The whole repository compiles with `tsc` and
+`esbuild`; `.vue` files would drag in a bundler, an SFC compiler and a separate
+declaration emitter to author markup that these components mostly do not have —
+the design system is CSS, so a my-eyes component is a handful of elements and a
+class name. Consumers are unaffected: they import compiled JavaScript and typed
+declarations either way.
 
 ## Actors
 
@@ -41,8 +49,10 @@ with or without Inertia.
 - **BR-08** — The cache is keyed by the full query state — sort, direction,
   search, filters, conjunction, page size. Any change to that state drops the
   whole cache, because it invalidates every page.
-- **BR-09** — Rows are virtualised: only rows within the viewport, plus a small
-  overscan, are in the DOM.
+- **BR-09** — Rows are virtualised above a threshold (30): only rows within the
+  viewport, plus a small overscan, are in the DOM. Below it the table renders
+  plainly — spacer rows and a scroll handler cost more than they save on a
+  short page, and the plain shape is the more accessible one.
 - **BR-10** — Virtualisation never changes what a screen reader or a keyboard
   user can reach in the current page: the scroll container is the table
   viewport, row semantics are preserved, and total row count is announced.
@@ -65,12 +75,17 @@ New package: `packages/vue`, published as `@my-eyes/vue`.
 
 | Export | Purpose |
 |---|---|
-| `MeButton`, `MeInput`, `MeSelect`, `MeField`, … | Form and UI components |
 | `MeTable` | The data table |
 | `MeFilters` | The filter builder |
-| `MeModal`, `MeToasts`, `MeTooltip`, `MeDropdown` | Overlays |
+| `MePagination` | Pagination for a payload |
+| `MeButton`, `MeBadge`, `MeAlert`, `MeInput`, `MeField` | The primitives the table leans on |
 | `useTable(options)` | The table's state machine, usable without `MeTable` |
-| `useToasts()` | Programmatic toasts |
+
+Not ported yet, and deliberately so — the table was the part that could not be
+reached any other way: modal, toasts, tooltip, dropdown, custom select, upload
+and the admin shell. Their behaviour already lives in `@my-eyes/core`'s DOM
+bindings and works against my-eyes markup rendered by hand, so nothing is
+blocked meanwhile.
 
 ## Contracts
 
@@ -107,6 +122,8 @@ Props of `MeTable`:
 | `rowHeight` | `44` | Estimated row height for virtualisation |
 | `overscan` | `8` | Rows rendered beyond the viewport |
 | `striped`, `compact` | `false` | Visual variants, same classes as Blade |
+| `searchDebounce` | `400` | Milliseconds before a search reaches the server |
+| `fetcher` | `fetch` | Replaces the request, for applications that wrap HTTP |
 
 ## States
 

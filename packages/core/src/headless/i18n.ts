@@ -36,6 +36,20 @@ export type MessageKey =
     | 'select.placeholder'
     | 'select.selected'
     | 'select.clear'
+    | 'filters.title'
+    | 'filters.add'
+    | 'filters.apply'
+    | 'filters.clear'
+    | 'filters.empty'
+    | 'table.search'
+    | 'table.perPage'
+    | 'table.showing'
+    | 'table.empty'
+    | 'table.emptyFiltered'
+    | 'table.previous'
+    | 'table.next'
+    | 'table.retry'
+    | 'pagination.label'
 
 export type Messages = Record<MessageKey, string>
 
@@ -61,6 +75,22 @@ const defaults: Messages = {
     'select.placeholder': 'Select an option',
     'select.selected': ':count selected',
     'select.clear': 'Clear selection',
+    // Rendered by the Vue and React tables. Blade and Livewire render these
+    // server-side, so they only appear here.
+    'filters.title': 'Filters',
+    'filters.add': 'Add condition',
+    'filters.apply': 'Apply',
+    'filters.clear': 'Clear all',
+    'filters.empty': 'No conditions yet. Add one to narrow the results.',
+    'table.search': 'Search',
+    'table.perPage': 'Per page',
+    'table.showing': 'Showing :first–:last of :total',
+    'table.empty': 'No records found',
+    'table.emptyFiltered': 'No records match these filters',
+    'table.previous': 'Previous',
+    'table.next': 'Next',
+    'table.retry': 'Retry',
+    'pagination.label': 'Pagination',
 }
 
 let messages: Messages = { ...defaults }
