@@ -49,9 +49,11 @@ import { startMyEyes } from '@my-eyes/core'
 startMyEyes()
 ```
 
-`startMyEyes()` also re-runs on `livewire:navigated`, `turbo:load` and after a
-Livewire morph. Bindings are idempotent — calling `initMyEyes(root)` again only
-picks up new elements.
+`startMyEyes()` also re-runs on `livewire:navigated`, `turbo:load`,
+`inertia:navigate` and after a Livewire morph — so a page swapped in by any of
+them arrives with its behaviour bound. Bindings are idempotent: calling
+`initMyEyes(root)` again only picks up what is new. An application should not
+need to re-bind by hand.
 
 Publish tags: `my-eyes-config`, `my-eyes-components`, `my-eyes-pages`,
 `my-eyes-errors`, `my-eyes-lang`.
@@ -412,7 +414,50 @@ exceptions:
 - `MeModal` emits `confirm` and has no `action`/`method`. There is no form, no
   CSRF token and no method spoofing.
 - `MeUpload` emits `update:modelValue` with a `File[]`.
-- `MeAlert` takes `dismissLabel` for the close button's accessible name.
+- `MeAlert` takes `dismissLabel`, plus `v-model:visible` and a `dismiss` emit.
+- `MeDropdown` emits `update:open` (read-only — the trigger is inside it).
+
+### Client-side routing
+
+Every component that renders a link takes `as`, defaulting to `'a'`:
+`MeNavItem`, `MeNavSubitem`, `MeDropdownItem`, `MeBrand`, and `MeButton` when
+given an `href`.
+
+```vue
+<MeNavItem :as="Link" href="/domains">Domains</MeNavItem>
+```
+
+Pass Inertia's `Link` or vue-router's `RouterLink`. The package never detects
+the router itself — do not suggest that it does, and do not write a click
+interceptor to work around a plain anchor.
+
+`MePagination` renders **buttons, not links**, and takes no `as`. Its items
+fetch a page rather than navigating; a link that does not navigate misleads
+assistive technology.
+
+### Opening a modal
+
+Two ways, both supported:
+
+```vue
+<MeModal v-model:open="confirming" id="delete-user" @confirm="destroy" />
+```
+
+```html
+<button data-me-modal-open="delete-user">Delete</button>
+```
+
+`MeModal` emits `close` and `update:open` however it was dismissed — Escape,
+backdrop, or a cancel button.
+
+### `useTheme()`
+
+```ts
+const { scheme, resolved, setScheme } = useTheme()
+```
+
+`scheme` is the choice, including `'system'`. `resolved` is `'light'` or
+`'dark'`, with `'system'` answered against the OS and updated when it changes.
 
 ```vue
 <MeTable endpoint="/users/table">

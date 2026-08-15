@@ -1,6 +1,15 @@
-import { initDropdowns, initModals, initToasts, initTooltips, t, toast, type ToastOptions } from '@my-eyes/core'
-import { defineComponent, h, onMounted, ref, type PropType } from 'vue'
-import { MeIcon, type Tone } from './primitives.js'
+import {
+    initDropdowns,
+    initModals,
+    initToasts,
+    initTooltips,
+    openModal,
+    t,
+    toast,
+    type ToastOptions,
+} from '@my-eyes/core'
+import { defineComponent, h, onBeforeUnmount, onMounted, ref, watch, type PropType } from 'vue'
+import { MeIcon, linkAsProp, type Tone } from './primitives.js'
 
 /**
  * Overlays.
@@ -22,14 +31,34 @@ export const MeDropdown = defineComponent({
         sheet: { type: Boolean, default: true },
     },
 
-    setup(props, { slots, attrs }) {
+    /**
+     * Read-only, deliberately. The trigger lives inside this component, so a
+     * menu is opened by the user rather than by the application — but knowing
+     * that it opened is occasionally useful (loading its contents lazily).
+     */
+    emits: { 'update:open': (_open: boolean) => true },
+
+    setup(props, { slots, emit, attrs }) {
         const host = ref<HTMLElement | null>(null)
+        let observer: MutationObserver | null = null
 
         onMounted(() => {
-            if (host.value) {
-                initDropdowns(host.value)
+            if (!host.value) {
+                return
             }
+
+            initDropdowns(host.value)
+
+            // The binding records the state in data-open; watching the
+            // attribute avoids duplicating the dismissal logic here.
+            observer = new MutationObserver(() => {
+                emit('update:open', host.value?.dataset.open === 'true')
+            })
+
+            observer.observe(host.value, { attributes: true, attributeFilter: ['data-open'] })
         })
+
+        onBeforeUnmount(() => observer?.disconnect())
 
         return () =>
             h('div', { ...attrs, ref: host, class: 'me-dropdown', 'data-me-dropdown': '', 'data-open': 'false' }, [
@@ -62,6 +91,7 @@ export const MeDropdownItem = defineComponent({
         /** Leaves the menu open after activation — a theme switcher wants this. */
         keepOpen: { type: Boolean, default: false },
         type: { type: String as PropType<'button' | 'submit'>, default: 'button' },
+        ...linkAsProp,
     },
 
     setup(props, { slots, attrs }) {
@@ -79,7 +109,7 @@ export const MeDropdownItem = defineComponent({
             }
 
             return props.href !== null
-                ? h('a', { ...shared, href: props.href }, children)
+                ? h(props.as, { ...shared, href: props.href }, () => children)
                 : h('button', { ...shared, type: props.type }, children)
         }
     },
@@ -117,10 +147,14 @@ const MODAL_ICONS: Record<string, string> = {
 /**
  * Confirmation modal, on the native `<dialog>` element.
  *
- * Open it from anywhere with `data-me-modal-open="<id>"`, exactly as in Blade,
- * or call `showModal()` on the element yourself. Confirming emits `confirm`;
- * there is no form and no CSRF here, because a Vue application submits through
- * its own client rather than a browser form post.
+ * Driven either way: bind `v-model:open`, or open it from anywhere with
+ * `data-me-modal-open="<id>"` exactly as in Blade. Dismissal is reported
+ * through `close` and `update:open` however it happened, so a parent's boolean
+ * cannot be left stuck on true.
+ *
+ * Confirming emits `confirm`. There is no form and no CSRF token here, because
+ * a Vue application submits through its own client rather than a browser form
+ * post.
  */
 export const MeModal = defineComponent({
     name: 'MeModal',
@@ -136,18 +170,66 @@ export const MeModal = defineComponent({
         size: { type: String as PropType<string | null>, default: null },
         /** Refuses to close on a backdrop click or Escape. Always pair with a cancel. */
         static: { type: Boolean, default: false },
+        /**
+         * Two-way, through `v-model:open`.
+         *
+         * Leave it out to drive the dialog the Blade way instead, with
+         * `data-me-modal-open="<id>"` on any element. Both work; a Vue
+         * application usually already holds the boolean.
+         */
+        open: { type: Boolean, default: undefined },
     },
 
-    emits: { confirm: () => true },
+    emits: {
+        confirm: () => true,
+        close: () => true,
+        'update:open': (_open: boolean) => true,
+    },
 
     setup(props, { slots, emit, attrs }) {
         const host = ref<HTMLDialogElement | null>(null)
 
+        /*
+         * <dialog> fires `close` however it was dismissed — Escape, a click on
+         * the backdrop, or a cancel button. Forwarding it is what keeps a
+         * parent's boolean from being left stuck on true.
+         */
+        const onNativeClose = (): void => {
+            emit('close')
+            emit('update:open', false)
+        }
+
         onMounted(() => {
-            if (host.value) {
-                initModals(host.value.parentElement ?? document)
+            if (!host.value) {
+                return
+            }
+
+            initModals(host.value.parentElement ?? document)
+            host.value.addEventListener('close', onNativeClose)
+
+            if (props.open) {
+                openModal(host.value)
             }
         })
+
+        onBeforeUnmount(() => host.value?.removeEventListener('close', onNativeClose))
+
+        watch(
+            () => props.open,
+            (open) => {
+                const dialog = host.value
+
+                if (!dialog || open === undefined) {
+                    return
+                }
+
+                if (open && !dialog.open) {
+                    openModal(dialog)
+                } else if (!open && dialog.open) {
+                    dialog.close()
+                }
+            },
+        )
 
         return () => {
             const icon = props.icon === null ? (MODAL_ICONS[props.variant] ?? 'info') : props.icon

@@ -13,6 +13,7 @@ export { MeTable } from './MeTable.js'
 export { MeFilters } from './MeFilters.js'
 export { MePagination } from './MePagination.js'
 export { useTable, type UseTable } from './useTable.js'
+export { useTheme, type UseTheme } from './useTheme.js'
 
 export {
     MeAlert,
@@ -26,6 +27,8 @@ export {
     MeProgress,
     MeProgressRing,
     initials,
+    linkAsProp,
+    type LinkAs,
     type Size,
     type Tone,
     type Variant,
