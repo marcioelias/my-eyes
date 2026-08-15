@@ -1,0 +1,133 @@
+# @my-eyes/vue
+
+my-eyes components for Vue 3 — the same design system, the same behaviour and
+the same server-driven table that the Blade and Livewire renderers use.
+
+The look lives in `@my-eyes/core`'s stylesheet and the behaviour in its
+framework-free TypeScript. These components only emit the markup that
+stylesheet expects, which is why a Vue button and a Blade button cannot drift
+apart.
+
+## Install
+
+```bash
+npm install @my-eyes/vue @my-eyes/core
+```
+
+`resources/css/app.css`:
+
+```css
+@import 'tailwindcss';
+@import '@my-eyes/core/css';
+```
+
+Both `vue` and `@my-eyes/core` are peer dependencies; the package ships no
+runtime dependency of its own.
+
+## Table
+
+The table paginates **on the server**. The Laravel side serialises itself and
+your application serves it — the PHP package ships no routes:
+
+```php
+// routes/web.php
+Route::get('/users/table', function () {
+    Gate::authorize('viewAny', User::class);
+
+    return MyEyes\Table\Table::make(User::query(), [
+        MyEyes\Table\Column::make('name', __('Name'))->sortable()->searchable(),
+        MyEyes\Table\Column::make('status', __('Status'))
+            ->filterable(MyEyes\Filters\FilterType::Select, ['active' => __('Active')]),
+    ])->defaultSort('created_at', 'desc');
+})->middleware('auth');
+```
+
+```vue
+<script setup lang="ts">
+import { MeTable, MeBadge } from '@my-eyes/vue'
+</script>
+
+<template>
+  <MeTable endpoint="/users/table">
+    <template #cell:status="{ value }">
+      <MeBadge :variant="value === 'active' ? 'success' : 'danger'">{{ value }}</MeBadge>
+    </template>
+  </MeTable>
+</template>
+```
+
+What you get on top of server pagination:
+
+- **Pages already fetched come back from memory.** Paging back and forth is
+  instant. The cache is dropped whenever sort, search, filters or page size
+  change, because those invalidate every page.
+- **Rows outside the viewport are not in the DOM**, so a large page size stays
+  smooth. Short pages render plainly — windowing a handful of rows costs more
+  than it saves.
+- **The URL tracks the table**, using the same query string keys the Blade
+  table uses. A link opens the same view of the same data in either renderer.
+- **Superseded requests are dropped.** Paging quickly from 1 to 5 shows page 5,
+  whatever order the responses land in.
+- **A failure keeps the rows on screen** and offers a retry, rather than
+  blanking the table the reader was using.
+
+### Props
+
+| Prop | Default | Meaning |
+|---|---|---|
+| `endpoint` | required | URL serving the payload |
+| `name` | `null` | Query string prefix, matching `Table::name()` |
+| `syncUrl` | `true` | Mirror the applied state into the address bar |
+| `striped`, `compact` | `false` | Visual variants, same classes as Blade |
+| `rowHeight` | `44` | Row height assumed by the windowing |
+| `overscan` | `8` | Rows rendered beyond the viewport |
+| `searchDebounce` | `400` | Milliseconds before a search reaches the server |
+| `fetcher` | `fetch` | Replace the request — auth headers, CSRF, credentials |
+
+### Slots
+
+| Slot | Scope | Purpose |
+|---|---|---|
+| `cell:<key>` | `{ value, row, column, index }` | Replace one column's cell |
+| `empty` | — | Replace the empty state |
+| `actions` | — | Toolbar content, beside the filters |
+
+### Cell values
+
+Values arrive as data, not markup, and render as **text** — a value containing
+`<script>` shows as characters. A column that genuinely needs markup opts in on
+the server with `Column::html()`, and only then is it rendered as HTML. Use a
+`cell:<key>` slot for anything richer; that is the supported route.
+
+### Without the component
+
+`useTable` is the same state machine with no markup attached:
+
+```ts
+const { rows, columns, pagination, loading, error, sort, setSearch, goToPage } =
+    useTable({ endpoint: '/users/table' })
+```
+
+## Translations
+
+Strings the components render themselves come from the core message
+dictionary. Set them once at boot:
+
+```ts
+import { configureMessages } from '@my-eyes/core'
+
+configureMessages({ 'table.search': 'Buscar', 'table.empty': 'Nenhum registro' })
+```
+
+## Components
+
+`MeTable`, `MeFilters`, `MePagination`, `MeButton`, `MeBadge`, `MeAlert`,
+`MeInput`, `MeField`.
+
+The remaining Blade components — modal, toasts, tooltip, dropdown, upload, the
+admin shell — are not ported yet. Their behaviour already lives in
+`@my-eyes/core` and works against my-eyes markup you render yourself.
+
+## Licence
+
+MIT © Márcio Elias

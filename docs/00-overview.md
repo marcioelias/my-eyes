@@ -46,5 +46,5 @@ Out of scope, permanently:
 |---|---|
 | Blade + core JS | implemented (`v0.1.0`) |
 | Livewire | implemented — `features/livewire-package.md` |
-| Vue | specified — `features/vue-package.md` |
+| Vue | implemented — `features/vue-package.md` |
 | React | specified — `features/react-package.md` |

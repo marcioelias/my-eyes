@@ -14,7 +14,13 @@ All notable changes to this project are documented here. The format follows
 - `Table::toPayload()` and `Jsonable`, serialising a table for clients that
   render rows from data — the contract the Vue and React renderers will speak.
 - `Column::html()`, opting a column into sending markup in that payload.
-- Specification under `docs/`, written before the renderers it describes.
+- `@my-eyes/vue` — the table for Vue 3, plus the primitives it leans on. Server
+  pagination as everywhere else, with pages already fetched served from memory
+  and rows outside the viewport kept out of the DOM.
+- Headless table client and row windowing in `@my-eyes/core`, shared by every
+  renderer that fetches rather than receives markup.
+- Specification under `docs/`, written before the renderers it describes,
+  including a reference for LLMs at `docs/llm-reference.md`.
 
 ## [0.1.0] - 2026-08-14
 

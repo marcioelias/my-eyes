@@ -30,16 +30,20 @@ jobs:
 
       - run: npm ci
 
-      - name: Check the tag matches the package version
+      # The npm packages are versioned together, so one tag describes both.
+      - name: Check the tag matches every package version
         run: |
           TAG="${GITHUB_REF_NAME#v}"
-          PKG="$(node -p "require('./packages/core/package.json').version")"
 
-          if [ "$TAG" != "$PKG" ]; then
-            echo "Tag $TAG does not match @my-eyes/core version $PKG." >&2
-            echo "Bump packages/core/package.json before tagging." >&2
-            exit 1
-          fi
+          for PACKAGE in core vue; do
+            VERSION="$(node -p "require('./packages/$PACKAGE/package.json').version")"
+
+            if [ "$TAG" != "$VERSION" ]; then
+              echo "Tag $TAG does not match @my-eyes/$PACKAGE version $VERSION." >&2
+              echo "Bump packages/$PACKAGE/package.json before tagging." >&2
+              exit 1
+            fi
+          done
 
       - name: Build the distributed files
         run: npm run build --workspaces --if-present
@@ -47,6 +51,14 @@ jobs:
       - name: Publish @my-eyes/core
         run: npm publish --provenance --access public
         working-directory: packages/core
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # After core, because it declares core as a peer dependency and the
+      # version it asks for has to already exist on the registry.
+      - name: Publish @my-eyes/vue
+        run: npm publish --provenance --access public
+        working-directory: packages/vue
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

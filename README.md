@@ -328,10 +328,22 @@ class Dashboard extends Component
 }
 ```
 
-### Vue and React
+### Vue
 
-Those renderers fetch rows instead of receiving markup, so the table serialises
-itself and **your** application serves it — the package still ships no routes:
+`@my-eyes/vue` ships the same table for Vue 3 — server-paginated, with pages
+already fetched served from memory and rows outside the viewport kept out of
+the DOM. See [packages/vue/README.md](packages/vue/README.md).
+
+```vue
+<MeTable endpoint="/users/table">
+  <template #cell:status="{ value }">
+    <MeBadge :variant="value === 'active' ? 'success' : 'danger'">{{ value }}</MeBadge>
+  </template>
+</MeTable>
+```
+
+Vue fetches rows instead of receiving markup, so the table serialises itself and
+**your** application serves it — the package still ships no routes:
 
 ```php
 Route::get('/users/table', function () {
@@ -556,7 +568,7 @@ every push.
 
 ## Roadmap
 
-Blade + JS ✅ → Livewire ✅ → Vue → React. The point of keeping the design system
+Blade + JS ✅ → Livewire ✅ → Vue ✅ → React. The point of keeping the design system
 in CSS and the behaviour in framework-free TypeScript is that each of those is a
 thin markup layer, not a rewrite.
 
