@@ -245,6 +245,48 @@ function setup(container: HTMLElement): void {
         return row
     }
 
+    /*
+     * The rows' current values, read from the DOM.
+     *
+     * Typed values deliberately do not round-trip through `conditions` — that
+     * would re-render on every keystroke and lose the caret — so the DOM is the
+     * authority at the moment the set is handed over.
+     */
+    const collect = (): { conditions: FilterCondition[]; conjunction: string } => {
+        const collected: FilterCondition[] = []
+
+        rowsHost.querySelectorAll<HTMLElement>('.me-filters__row').forEach((row) => {
+            const field = row.querySelector<HTMLSelectElement>('[data-role="field"]')?.value
+            const operator = row.querySelector<HTMLSelectElement>('[data-role="operator"]')?.value
+
+            if (!field || !operator) {
+                return
+            }
+
+            collected.push({
+                field,
+                operator,
+                values: Array.from(
+                    row.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[data-role^="value-"]'),
+                ).map((input) => input.value),
+            })
+        })
+
+        return { conditions: collected, conjunction }
+    }
+
+    /*
+     * Blade applies filters by submitting the surrounding GET form. Livewire has
+     * no form to submit, so the panel announces the set instead and the
+     * component pushes it to the server. Both drive the same builder, and in
+     * Blade the event simply has no listener.
+     */
+    const announce = (): void => {
+        container.dispatchEvent(new CustomEvent('me-filters-apply', { detail: collect(), bubbles: true }))
+    }
+
+    container.querySelector('[data-me-filter-apply]')?.addEventListener('click', announce)
+
     addButton.addEventListener('click', () => {
         const field = schema[0]
         if (field) {
@@ -259,6 +301,7 @@ function setup(container: HTMLElement): void {
     container.querySelector('[data-me-filter-clear]')?.addEventListener('click', () => {
         conditions = []
         render()
+        announce()
     })
 
     render()

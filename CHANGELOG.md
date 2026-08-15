@@ -8,6 +8,18 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Livewire renderer for the data table: `MyEyes\Livewire\TableComponent` and
+  `MyEyes\Livewire\InteractsWithTable`, sharing the query building and the
+  query string keys with the Blade table.
+- `Table::toPayload()` and `Jsonable`, serialising a table for clients that
+  render rows from data — the contract the Vue and React renderers will speak.
+- `Column::html()`, opting a column into sending markup in that payload.
+- Specification under `docs/`, written before the renderers it describes.
+
+## [0.1.0] - 2026-08-14
+
+### Added
+
 - Design tokens with role-based colours (`primary`, `secondary`, `success`,
   `danger`, `warning`, `info`), light and dark declared once through
   `light-dark()`.
@@ -34,4 +46,5 @@ All notable changes to this project are documented here. The format follows
   Composer refuses to install the earlier versions — supporting them would
   produce an unsolvable dependency set rather than a working install.
 
-[Unreleased]: https://github.com/marcioelias/my-eyes/commits/main
+[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/marcioelias/my-eyes/releases/tag/v0.1.0
