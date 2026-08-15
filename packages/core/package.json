@@ -1,6 +1,6 @@
 {
   "name": "@my-eyes/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Design tokens, component styles and headless behaviours shared by every my-eyes frontend",
   "type": "module",
   "files": [

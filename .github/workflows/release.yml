@@ -48,17 +48,20 @@ jobs:
       - name: Build the distributed files
         run: npm run build --workspaces --if-present
 
-      - name: Publish @my-eyes/core
-        run: npm publish --provenance --access public
-        working-directory: packages/core
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # After core, because it declares core as a peer dependency and the
-      # version it asks for has to already exist on the registry.
+      # Newest package first, deliberately. npm does not resolve peer
+      # dependencies at publish time, so the order is free to be chosen for
+      # failure behaviour instead — and the package most likely to be refused
+      # is the one the token has never published before. Failing on it leaves
+      # nothing released, rather than half a release that cannot be undone.
       - name: Publish @my-eyes/vue
         run: npm publish --provenance --access public
         working-directory: packages/vue
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @my-eyes/core
+        run: npm publish --provenance --access public
+        working-directory: packages/core
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

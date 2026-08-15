@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-14
+
 ### Added
 
 - Livewire renderer for the data table: `MyEyes\Livewire\TableComponent` and
@@ -52,5 +54,6 @@ All notable changes to this project are documented here. The format follows
   Composer refuses to install the earlier versions — supporting them would
   produce an unsolvable dependency set rather than a working install.
 
-[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/marcioelias/my-eyes/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/marcioelias/my-eyes/releases/tag/v0.1.0
