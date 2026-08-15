@@ -6,6 +6,23 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- The rest of the Vue renderer: every Blade component now has an equivalent —
+  form controls, overlays, the admin shell and its navigation. Controls that
+  carry behaviour delegate to `@my-eyes/core`, the same code Blade and Livewire
+  run.
+- The icon set as TypeScript (`@my-eyes/core`'s `icons`), with a test keeping
+  it in step with the Blade component.
+- The individual DOM bindings are exported from `@my-eyes/core`, so a component
+  framework can bind the element it just mounted instead of scanning the page.
+
+### Fixed
+
+- `MeField` emitted `me-field__label`, `me-field__hint` and `me-field__error`,
+  none of which exist in the stylesheet — labels, hints and errors rendered
+  unstyled. It now emits `me-label`, `me-hint` and `me-error`, as Blade does.
+
 ## [0.2.0] - 2026-08-14
 
 ### Added

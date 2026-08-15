@@ -43,6 +43,9 @@ final class Messages
             'upload.tooLarge' => __('my-eyes::ui.upload.too_large'),
             'upload.wrongType' => __('my-eyes::ui.upload.wrong_type'),
             'upload.tooMany' => __('my-eyes::ui.upload.too_many'),
+            'upload.drop' => __('my-eyes::ui.upload.drop'),
+            'upload.browse' => __('my-eyes::ui.upload.browse'),
+            'upload.upTo' => __('my-eyes::ui.upload.up_to'),
             'filters.where' => __('my-eyes::filters.ui.where'),
             'filters.and' => __('my-eyes::filters.ui.and'),
             'filters.or' => __('my-eyes::filters.ui.or'),
@@ -78,6 +81,17 @@ final class Messages
             'table.next' => __('my-eyes::filters.table.next'),
             'table.retry' => __('my-eyes::filters.table.retry'),
             'pagination.label' => __('my-eyes::ui.pagination.label'),
+            'layout.skip' => __('my-eyes::ui.layout.skip'),
+            'layout.openMenu' => __('my-eyes::ui.layout.open_menu'),
+            'layout.closeMenu' => __('my-eyes::ui.layout.close_menu'),
+            'layout.mainNav' => __('my-eyes::ui.layout.main_nav'),
+            'layout.collapse' => __('my-eyes::ui.layout.collapse'),
+            'layout.toggleTheme' => __('my-eyes::ui.layout.toggle_theme'),
+            'layout.accountMenu' => __('my-eyes::ui.layout.account_menu'),
+            'layout.theme' => __('my-eyes::ui.theme.theme'),
+            'layout.system' => __('my-eyes::ui.theme.system'),
+            'layout.light' => __('my-eyes::ui.theme.light'),
+            'layout.dark' => __('my-eyes::ui.theme.dark'),
         ];
     }
 }

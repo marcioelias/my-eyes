@@ -21,12 +21,26 @@ export * from './headless/upload.js'
 export * from './headless/virtual.js'
 export { toast, type Toast, type ToastOptions, type ToastPosition, type ToastVariant } from './dom/toast.js'
 
+export * from './icons.js'
+
 /*
- * The filter builder binding, exported so the Vue and React panels can drive
- * the same rows the Blade and Livewire ones do rather than reimplementing a
- * condition row three more times.
+ * The individual bindings.
+ *
+ * initMyEyes() scans a whole tree, which is what a server-rendered page wants.
+ * A component framework knows exactly which element it just mounted, so it
+ * binds that one instead — and drives the same behaviour the Blade and
+ * Livewire renderers do rather than reimplementing a dropdown three more times.
  */
+export { initDropdowns } from './dom/dropdown.js'
 export { initFilterPanels, initFilters } from './dom/filters.js'
+export { initDismissables, initNavigateSelects, initPasswordToggles, initThemeToggles } from './dom/misc.js'
+export { initModals } from './dom/modal.js'
+export { initNumericInputs } from './dom/numeric-input.js'
+export { initSelects } from './dom/select.js'
+export { initShell } from './dom/shell.js'
+export { initToasts } from './dom/toast.js'
+export { initTooltips } from './dom/tooltip.js'
+export { initUploads } from './dom/upload.js'
 
 /**
  * Wires every my-eyes behaviour inside `root`.

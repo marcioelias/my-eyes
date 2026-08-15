@@ -341,15 +341,21 @@ Messages: `configureMessages(record)` · `resetMessages()` · `t(key, replacemen
 On the PHP side, `MyEyes\Support\Messages::forJavaScript()` returns exactly the
 keys the dictionary accepts — hand it to Inertia or a `<script>` tag.
 
-Message keys: `toast.close` `password.show` `password.hide` `upload.remove`
-`upload.tooLarge` `upload.wrongType` `upload.tooMany` `filters.where`
-`filters.and` `filters.or` `filters.remove` `filters.value`
-`filters.rangeSeparator` `filters.commaHint` `filters.title` `filters.add`
-`filters.apply` `filters.clear` `filters.empty` `common.yes` `common.no`
-`select.search` `select.empty` `select.placeholder` `select.selected`
-`select.clear` `table.search` `table.perPage` `table.showing` `table.empty`
-`table.emptyFiltered` `table.previous` `table.next` `table.retry`
-`pagination.label`
+Message keys (49):
+
+`toast.close` `password.show` `password.hide` `upload.remove`
+`upload.tooLarge` `upload.wrongType` `upload.tooMany` `upload.drop`
+`upload.browse` `upload.upTo` `filters.where` `filters.and` `filters.or`
+`filters.remove` `filters.value` `filters.rangeSeparator`
+`filters.commaHint` `common.yes` `common.no` `select.search`
+`select.empty` `select.placeholder` `select.selected` `select.clear`
+`filters.title` `filters.add` `filters.apply` `filters.clear`
+`filters.empty` `table.search` `table.perPage` `table.showing`
+`table.empty` `table.emptyFiltered` `table.previous` `table.next`
+`table.retry` `pagination.label` `layout.skip` `layout.openMenu`
+`layout.closeMenu` `layout.mainNav` `layout.collapse`
+`layout.toggleTheme` `layout.accountMenu` `layout.theme` `layout.system`
+`layout.light` `layout.dark`
 
 Table client (framework-free):
 
@@ -363,8 +369,15 @@ client.subscribe(listener)
 
 Also exported: `buildQueryString` `readQueryFromUrl` `computeVirtualWindow`
 `shouldVirtualise`, the filter model (`blankCondition` `retargetCondition`
-`fitValues` `findField` `findOperator`), and the theme, select, numeric,
-upload and dismissable headless models.
+`fitValues` `findField` `findOperator`), the icon set (`icons`, `IconName`),
+and the theme, select, numeric, upload and dismissable headless models.
+
+The individual DOM bindings are exported too, for a component framework that
+knows exactly which element it mounted: `initDropdowns` `initModals`
+`initTooltips` `initToasts` `initSelects` `initUploads` `initNumericInputs`
+`initShell` `initThemeToggles` `initPasswordToggles` `initDismissables`
+`initNavigateSelects` `initFilters` `initFilterPanels`. Each takes a root and
+skips elements it has already bound.
 
 Theme: three modes — `system` (default), `light`, `dark`. Any element with
 `data-me-theme` cycles them; `data-me-theme="dark"` sets one. Stored under
@@ -374,8 +387,32 @@ Theme: three modes — `system` (default), `light`, `dark`. Any element with
 
 ## 8. `@my-eyes/vue`
 
-Exports: `MeTable` `MeFilters` `MePagination` `MeButton` `MeBadge` `MeAlert`
-`MeInput` `MeField` `useTable`.
+Every Blade component has a Vue equivalent. Exports:
+
+| Group | Exports |
+|---|---|
+| Table | `MeTable` `MeFilters` `MePagination` `useTable` |
+| Display | `MeButton` `MeBadge` `MeAlert` `MeCard` `MeAvatar` `MeIcon` `MeProgress` `MeProgressRing` `MeBrand` |
+| Form | `MeField` `MeInput` `MeTextarea` `MeSelect` `MeSelectField` `MeCheckbox` `MeRadio` `MeSwitch` `MeNumeric` `MeUpload` |
+| Overlay | `MeModal` `MeDropdown` `MeDropdownItem` `MeDropdownHeader` `MeDropdownDivider` `MeTooltip` `MeToasts` `useToasts` |
+| Shell | `MeAdminLayout` `MeNavSection` `MeNavGroup` `MeNavItem` `MeNavSubitem` `MeUserMenu` `MeThemeToggle` `MeThemeMenu` |
+| Helper | `initials(name)` |
+
+Props mirror the Blade component of the same name (section 3), with these
+exceptions:
+
+- Every form control uses `v-model` — `modelValue` plus `update:modelValue` —
+  in place of `value`/`checked`. `MeCheckbox` binds a boolean, or an array to
+  act as one of a group.
+- `MeButton` takes `iconOnly` for the icon-only shape; `icon` is the icon name.
+- `MeAdminLayout` renders **body content, not a document**: no `<html>`, no
+  `<head>`. Slots: `nav`, `topbar`, `user`, `actions`, `sidebarFooter`,
+  `brand`, `footer`, default.
+- `MeNavItem` requires `active` explicitly; it does not compare URLs.
+- `MeModal` emits `confirm` and has no `action`/`method`. There is no form, no
+  CSRF token and no method spoofing.
+- `MeUpload` emits `update:modelValue` with a `File[]`.
+- `MeAlert` takes `dismissLabel` for the close button's accessible name.
 
 ```vue
 <MeTable endpoint="/users/table">
@@ -435,10 +472,11 @@ Do not generate any of the following — they are not part of this package:
   helpers of any kind.
 - **React, Svelte or Angular packages.** React is specified
   (`docs/features/react-package.md`) but not implemented.
-- **Vue components beyond the list in section 8** — no `MeModal`, `MeToasts`,
-  `MeTooltip`, `MeDropdown`, `MeSelect`, `MeUpload`, `MeCard`, no admin shell,
-  and no `useToasts`. Their behaviour is available from `@my-eyes/core`'s DOM
-  bindings against markup you render yourself.
+- **Vue components beyond the list in section 8.** The list is complete; there
+  is no `MeTabs`, `MeAccordion`, `MeDatePicker`, `MeCombobox`, `MeDrawer`,
+  `MePopover`, `MeStepper`, `MeBreadcrumb`, `MeSkeleton` or `MeSpinner`.
+- **Vue starter-kit screens.** Login, registration and password reset ship as
+  Blade views only. The components to build them from all exist.
 - **`.vue` single-file components** in the published package.
 - **Row selection, bulk actions, inline editing, column resizing, column
   reordering, CSV/Excel export, infinite scroll, grouped rows, nested filter

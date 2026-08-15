@@ -1,0 +1,370 @@
+import { mount } from '@vue/test-utils'
+import { describe, expect, it } from 'vitest'
+import { h } from 'vue'
+import {
+    MeAlert,
+    MeAvatar,
+    MeBadge,
+    MeButton,
+    MeCard,
+    MeCheckbox,
+    MeDropdown,
+    MeField,
+    MeIcon,
+    MeInput,
+    MeModal,
+    MeNavItem,
+    MeNumeric,
+    MeProgress,
+    MeProgressRing,
+    MeRadio,
+    MeSelect,
+    MeSelectField,
+    MeSwitch,
+    MeTextarea,
+    MeTooltip,
+    MeUpload,
+    initials,
+} from '../src/index.js'
+
+/**
+ * The class names these components emit are the contract with
+ * `@my-eyes/core/css`. A test that only checked "it renders" would not catch
+ * the one failure that matters — a class the stylesheet has never heard of.
+ *
+ * @see docs/features/vue-package.md BR-01
+ */
+
+describe('MeField', () => {
+    it('emits the classes the stylesheet defines', () => {
+        const wrapper = mount(MeField, {
+            props: { label: 'Name', for: 'name', required: true, error: 'Required' },
+            slots: { default: () => h('input') },
+        })
+
+        expect(wrapper.find('label').classes()).toEqual(['me-label', 'me-label--required'])
+        expect(wrapper.find('label').attributes('for')).toBe('name')
+        expect(wrapper.find('p').classes()).toEqual(['me-error'])
+    })
+
+    it('shows the hint only while there is no error', () => {
+        const hint = mount(MeField, { props: { hint: 'Two words' } })
+        expect(hint.find('.me-hint').exists()).toBe(true)
+
+        const error = mount(MeField, { props: { hint: 'Two words', error: 'Required' } })
+        expect(error.find('.me-hint').exists()).toBe(false)
+        expect(error.find('.me-error').text()).toContain('Required')
+    })
+
+    it('carries the inline modifier', () => {
+        expect(mount(MeField, { props: { inline: true } }).classes()).toContain('me-field--inline')
+    })
+})
+
+describe('MeButton', () => {
+    it('composes variant and size', () => {
+        const wrapper = mount(MeButton, { props: { variant: 'danger', size: 'sm' } })
+
+        expect(wrapper.classes()).toContain('me-btn')
+        expect(wrapper.classes()).toContain('me-btn--danger')
+        expect(wrapper.classes()).toContain('me-btn--sm')
+    })
+
+    it('renders an anchor when it navigates', () => {
+        const wrapper = mount(MeButton, { props: { href: '/orders' } })
+
+        expect(wrapper.element.tagName).toBe('A')
+        expect(wrapper.attributes('href')).toBe('/orders')
+    })
+
+    it('disables itself while loading', () => {
+        expect(mount(MeButton, { props: { loading: true } }).attributes('disabled')).toBeDefined()
+    })
+})
+
+describe('MeIcon', () => {
+    it('draws a known icon', () => {
+        const wrapper = mount(MeIcon, { props: { name: 'check' } })
+
+        expect(wrapper.element.tagName).toBe('svg')
+        expect(wrapper.html()).toContain('<path')
+    })
+
+    it('renders nothing for a name it does not have, rather than breaking', () => {
+        const wrapper = mount(MeIcon, { props: { name: 'nope' as never } })
+
+        expect(wrapper.find('path').exists()).toBe(false)
+    })
+})
+
+describe('MeAlert', () => {
+    it('picks the icon that matches the variant', () => {
+        expect(mount(MeAlert, { props: { variant: 'danger' } }).html()).toContain('me-alert__icon')
+        expect(mount(MeAlert, { props: { variant: 'danger' } }).classes()).toContain('me-alert--danger')
+    })
+
+    it('drops the icon when told to', () => {
+        expect(mount(MeAlert, { props: { icon: false } }).find('.me-alert__icon').exists()).toBe(false)
+    })
+})
+
+describe('MeBadge', () => {
+    it('renders a dot instead of an icon when asked', () => {
+        const wrapper = mount(MeBadge, { props: { variant: 'success', dot: true } })
+
+        expect(wrapper.find('.me-dot--success').exists()).toBe(true)
+        expect(wrapper.find('svg').exists()).toBe(false)
+    })
+})
+
+describe('MeAvatar', () => {
+    it('builds initials from the first and last word', () => {
+        expect(initials('Márcio Elias')).toBe('ME')
+        expect(initials('Ana')).toBe('AN')
+        expect(initials('')).toBe('')
+    })
+
+    it('wraps the avatar when it carries a status dot', () => {
+        const wrapper = mount(MeAvatar, { props: { name: 'Ana Souza', status: 'online' } })
+
+        expect(wrapper.classes()).toContain('me-avatar-wrap')
+        expect(wrapper.find('.me-dot--online').exists()).toBe(true)
+    })
+
+    it('prefers an image over initials', () => {
+        const wrapper = mount(MeAvatar, { props: { name: 'Ana', src: '/ana.png' } })
+
+        expect(wrapper.find('img').attributes('src')).toBe('/ana.png')
+    })
+})
+
+describe('MeCard', () => {
+    it('omits the header entirely when there is nothing to put in it', () => {
+        expect(mount(MeCard).find('.me-card__header').exists()).toBe(false)
+    })
+
+    it('renders header, body and footer', () => {
+        const wrapper = mount(MeCard, {
+            props: { title: 'Orders', description: 'Recent' },
+            slots: { default: () => 'body', footer: () => 'footer', actions: () => 'actions' },
+        })
+
+        expect(wrapper.find('.me-card__title').text()).toBe('Orders')
+        expect(wrapper.find('.me-card__description').text()).toBe('Recent')
+        expect(wrapper.find('.me-card__header-actions').text()).toBe('actions')
+        expect(wrapper.find('.me-card__footer').text()).toBe('footer')
+    })
+})
+
+describe('MeProgress', () => {
+    it('reports the value to assistive technology', () => {
+        const wrapper = mount(MeProgress, { props: { value: 40, max: 200, showValue: true, label: 'Uploading' } })
+        const bar = wrapper.find('[role="progressbar"]')
+
+        expect(bar.attributes('aria-valuenow')).toBe('40')
+        expect(bar.attributes('aria-valuemax')).toBe('200')
+        expect(wrapper.find('.me-progress-field__value').text()).toBe('20%')
+    })
+
+    it('goes indeterminate with no value, and claims no reading', () => {
+        const wrapper = mount(MeProgress)
+
+        expect(wrapper.find('.me-progress--indeterminate').exists()).toBe(true)
+        expect(wrapper.find('[role="progressbar"]').attributes('aria-valuenow')).toBeUndefined()
+    })
+
+    it('clamps a value past the maximum', () => {
+        const wrapper = mount(MeProgressRing, { props: { value: 500, max: 100 } })
+
+        expect(wrapper.find('.me-progress-ring__value').text()).toBe('100%')
+    })
+})
+
+describe('form controls', () => {
+    it('MeInput binds v-model and reports invalidity', async () => {
+        const wrapper = mount(MeInput, { props: { modelValue: 'ana', error: 'Taken', name: 'user' } })
+
+        expect(wrapper.find('input').classes()).toContain('me-input')
+        expect(wrapper.find('input').attributes('aria-invalid')).toBe('true')
+
+        await wrapper.find('input').setValue('bruno')
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['bruno'])
+    })
+
+    it('MeInput groups the control when something sits beside it', () => {
+        expect(mount(MeInput, { props: { prefix: 'R$' } }).find('.me-input-group').exists()).toBe(true)
+        expect(mount(MeInput).find('.me-input-group').exists()).toBe(false)
+    })
+
+    it('MeInput adds the reveal button for a password', () => {
+        const wrapper = mount(MeInput, { props: { type: 'password' } })
+
+        expect(wrapper.find('[data-me-password-toggle]').exists()).toBe(true)
+    })
+
+    it('MeTextarea binds v-model', async () => {
+        const wrapper = mount(MeTextarea, { props: { modelValue: 'hello', rows: 6 } })
+
+        expect(wrapper.find('textarea').attributes('rows')).toBe('6')
+        await wrapper.find('textarea').setValue('bye')
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['bye'])
+    })
+
+    it('MeSelect accepts a map of options and marks the selected one', () => {
+        const wrapper = mount(MeSelect, {
+            props: { options: { active: 'Active', banned: 'Banned' }, modelValue: 'banned' },
+        })
+
+        const options = wrapper.findAll('option')
+        expect(options.map((option) => option.text())).toEqual(['Active', 'Banned'])
+        expect((options[1]?.element as HTMLOptionElement).selected).toBe(true)
+    })
+
+    it('MeSelect emits an array when multiple', async () => {
+        const wrapper = mount(MeSelect, {
+            props: { options: { a: 'A', b: 'B' }, multiple: true, modelValue: [], name: 'tags' },
+        })
+
+        expect(wrapper.find('select').attributes('name')).toBe('tags[]')
+
+        const options = wrapper.findAll('option')
+        ;(options[0]?.element as HTMLOptionElement).selected = true
+        await wrapper.find('select').trigger('change')
+
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([['a']])
+    })
+
+    it('MeCheckbox toggles a boolean', async () => {
+        const wrapper = mount(MeCheckbox, { props: { modelValue: false, label: 'Agree' } })
+
+        expect(wrapper.find('input').classes()).toContain('me-check')
+        expect(wrapper.find('.me-choice__label').text()).toBe('Agree')
+
+        await wrapper.find('input').setValue(true)
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([true])
+    })
+
+    it('MeCheckbox adds to and removes from a group', async () => {
+        const wrapper = mount(MeCheckbox, { props: { modelValue: ['a'], value: 'b' } })
+
+        await wrapper.find('input').setValue(true)
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([['a', 'b']])
+
+        const inGroup = mount(MeCheckbox, { props: { modelValue: ['a', 'b'], value: 'b' } })
+        expect((inGroup.find('input').element as HTMLInputElement).checked).toBe(true)
+
+        await inGroup.find('input').setValue(false)
+        expect(inGroup.emitted('update:modelValue')?.[0]).toEqual([['a']])
+    })
+
+    it('MeRadio derives an id from the name and value', async () => {
+        const wrapper = mount(MeRadio, { props: { name: 'plan', value: 'pro', modelValue: 'pro' } })
+
+        expect(wrapper.find('input').attributes('id')).toBe('plan_pro')
+        expect((wrapper.find('input').element as HTMLInputElement).checked).toBe(true)
+
+        await wrapper.find('input').trigger('change')
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['pro'])
+    })
+
+    it('MeSwitch keeps a real checkbox behind the track', async () => {
+        const wrapper = mount(MeSwitch, { props: { modelValue: true, size: 'lg' } })
+
+        expect(wrapper.find('label').classes()).toContain('me-switch--lg')
+        expect(wrapper.find('input').attributes('role')).toBe('switch')
+        expect(wrapper.find('.me-switch__thumb').exists()).toBe(true)
+
+        await wrapper.find('input').setValue(false)
+        expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([false])
+    })
+
+    it('MeSelectField hands the core binding its options and selection', () => {
+        const wrapper = mount(MeSelectField, {
+            props: {
+                name: 'tags',
+                multiple: true,
+                modelValue: ['php'],
+                options: [
+                    { value: 'php', label: 'PHP' },
+                    { value: 'go', label: 'Go', disabled: true },
+                ],
+            },
+        })
+
+        const host = wrapper.find('[data-me-select]')
+        expect(JSON.parse(host.attributes('data-options') ?? '[]')).toHaveLength(2)
+        expect(JSON.parse(host.attributes('data-selected') ?? '[]')).toEqual(['php'])
+        expect(host.attributes('data-multiple')).toBe('true')
+        expect(host.attributes('data-name')).toBe('tags')
+    })
+
+    it('MeNumeric keeps the raw value in a hidden input', () => {
+        const wrapper = mount(MeNumeric, { props: { name: 'amount', modelValue: '1234.56', decimals: 2 } })
+
+        const hidden = wrapper.find('input[type="hidden"]')
+        expect(hidden.attributes('value')).toBe('1234.56')
+        expect(hidden.attributes('name')).toBe('amount')
+        expect(wrapper.find('[data-me-numeric]').attributes('data-decimals')).toBe('2')
+        expect(wrapper.find('[data-me-step-up]').exists()).toBe(true)
+    })
+
+    it('MeUpload describes its limits to the binding', () => {
+        const wrapper = mount(MeUpload, { props: { name: 'files', multiple: true, maxSize: 1048576, accept: 'image/*' } })
+
+        expect(wrapper.find('input[type="file"]').attributes('name')).toBe('files[]')
+        expect(wrapper.find('[data-me-upload]').attributes('data-max-size')).toBe('1048576')
+        // Formatted the way MyEyes\Support\FileSize formats it.
+        expect(wrapper.find('.me-upload__hint').text()).toContain('1 MB')
+    })
+})
+
+describe('overlays', () => {
+    it('MeDropdown renders a trigger and a panel', () => {
+        const wrapper = mount(MeDropdown, {
+            props: { align: 'start' },
+            slots: { trigger: () => 'open', default: () => 'items' },
+        })
+
+        expect(wrapper.attributes('data-me-dropdown')).toBeDefined()
+        expect(wrapper.find('[data-me-dropdown-trigger]').text()).toBe('open')
+        expect(wrapper.find('.me-dropdown__panel--start').exists()).toBe(true)
+        expect(wrapper.find('[role="menu"]').text()).toBe('items')
+    })
+
+    it('MeModal is a dialog whose confirm follows the variant', async () => {
+        const wrapper = mount(MeModal, {
+            props: { id: 'delete-user', variant: 'danger', title: 'Delete?', confirm: 'Delete', cancel: 'Cancel' },
+        })
+
+        expect(wrapper.element.tagName).toBe('DIALOG')
+        expect(wrapper.classes()).toContain('me-modal--danger')
+        expect(wrapper.attributes('aria-labelledby')).toBe('delete-user-title')
+
+        const buttons = wrapper.findAll('.me-modal__actions button')
+        expect(buttons[1]?.classes()).toContain('me-btn--danger')
+
+        await buttons[1]?.trigger('click')
+        expect(wrapper.emitted('confirm')).toHaveLength(1)
+    })
+
+    it('MeTooltip carries the text and placement the binding reads', () => {
+        const wrapper = mount(MeTooltip, { props: { text: 'Delete order', placement: 'end' } })
+
+        expect(wrapper.attributes('data-me-tooltip')).toBe('Delete order')
+        expect(wrapper.attributes('data-tooltip-placement')).toBe('end')
+    })
+})
+
+describe('MeNavItem', () => {
+    it('marks the current page explicitly', () => {
+        expect(mount(MeNavItem, { props: { href: '/x', active: true } }).attributes('aria-current')).toBe('page')
+        expect(mount(MeNavItem, { props: { href: '/x' } }).attributes('aria-current')).toBeUndefined()
+    })
+
+    it('hides the label and badge when the rail is collapsed', () => {
+        const wrapper = mount(MeNavItem, { props: { href: '/x', badge: 3 }, slots: { default: () => 'Users' } })
+
+        // me-hide-collapsed is what the stylesheet keys the icon rail off.
+        expect(wrapper.findAll('.me-hide-collapsed')).toHaveLength(2)
+    })
+})
