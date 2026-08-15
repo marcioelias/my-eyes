@@ -1,6 +1,6 @@
 # Livewire renderer
 
-Status: draft
+Status: implemented
 
 ## Purpose
 
@@ -39,6 +39,11 @@ its own; whatever the host component authorises is what applies.
   closures.
 - **BR-08** — Search is debounced client-side; the server sees one round trip
   per pause, not one per keystroke.
+- **BR-08a** — The filter panel's rows are rendered by the core JavaScript, so
+  Livewire is told not to morph them. Communication is one way and explicit:
+  the panel announces its condition set as a DOM event, the component applies
+  it. Consequently the panel's own Clear applies immediately — there is no form
+  left to submit afterwards — and the toolbar carries no separate clear-all.
 - **BR-09** — The package registers its Livewire components only when Livewire
   is installed. A project without Livewire loads the package unchanged and
   sees no new bindings.

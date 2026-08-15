@@ -152,7 +152,16 @@ final class Table implements Jsonable
     /** The query string key for a parameter, honouring the table name. */
     public function parameter(string $key): string
     {
-        return $this->name === null ? $key : "{$this->name}_{$key}";
+        return self::parameterFor($this->name, $key);
+    }
+
+    /**
+     * The same rule, for callers that hold a name but not a table — the
+     * Livewire trait needs it before a table exists.
+     */
+    public static function parameterFor(?string $name, string $key): string
+    {
+        return $name === null ? $key : "{$name}_{$key}";
     }
 
     public function request(): Request

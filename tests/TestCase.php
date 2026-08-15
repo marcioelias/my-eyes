@@ -7,6 +7,7 @@ namespace MyEyes\Tests;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\ViewErrorBag;
+use Livewire\LivewireServiceProvider;
 use MyEyes\MyEyesServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
@@ -26,7 +27,12 @@ abstract class TestCase extends BaseTestCase
      */
     protected function getPackageProviders($app): array
     {
-        return [MyEyesServiceProvider::class];
+        // Livewire is optional for consumers, so it is only ever a dev
+        // dependency here — the suite skips its tests when it is absent.
+        return array_values(array_filter([
+            MyEyesServiceProvider::class,
+            class_exists(LivewireServiceProvider::class) ? LivewireServiceProvider::class : null,
+        ]));
     }
 
     /** Table tests run against a real (in-memory) database, not mocks. */

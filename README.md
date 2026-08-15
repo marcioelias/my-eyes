@@ -275,6 +275,78 @@ Column::make('customer', __('Customer'))
         ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$term}%")));
 ```
 
+### Livewire
+
+The same table, without the page reload. Declare the query and the columns; the
+sorting, searching, filtering and paging come with it:
+
+```php
+use MyEyes\Livewire\TableComponent;
+
+class UsersTable extends TableComponent
+{
+    protected function query(): Builder
+    {
+        return User::query();
+    }
+
+    protected function columns(): array
+    {
+        return [
+            Column::make('name', __('Name'))->sortable()->searchable(),
+            Column::make('status', __('Status'))
+                ->filterable(FilterType::Select, ['active' => __('Active')]),
+        ];
+    }
+}
+```
+
+```blade
+<livewire:users-table />
+```
+
+State lives in Livewire properties and syncs to the **same query string keys**
+the Blade table uses, so a URL from one opens the same view in the other. It is
+still the server that decides: a property naming a column that is not sortable,
+or an operator its type does not offer, is dropped exactly as a crafted URL
+would be.
+
+Name the table when a page has two of them — `protected function tableName(): ?string`
+— and every key is prefixed, `page` included.
+
+When the table is one part of a bigger component, use the trait directly:
+
+```php
+class Dashboard extends Component
+{
+    use MyEyes\Livewire\InteractsWithTable;
+
+    public function table(): Table
+    {
+        return $this->buildTable(User::query(), [/* columns */]);
+    }
+}
+```
+
+### Vue and React
+
+Those renderers fetch rows instead of receiving markup, so the table serialises
+itself and **your** application serves it — the package still ships no routes:
+
+```php
+Route::get('/users/table', function () {
+    Gate::authorize('viewAny', User::class);
+
+    return Table::make(User::query(), $columns)->defaultSort('created_at', 'desc');
+})->middleware('auth');
+```
+
+The payload carries only declared columns, and cell values as data rather than
+markup. A column that renders markup must say so with `->html()`; without it,
+serialising throws instead of quietly turning escaped output into raw output on
+the client. The contract is documented in
+[docs/policies/table-payload.md](docs/policies/table-payload.md).
+
 ## Advanced filters
 
 Field / operator / value rows, joined by one **and/or** conjunction chosen on
@@ -484,9 +556,12 @@ every push.
 
 ## Roadmap
 
-Blade + JS ✅ → Livewire → Vue → React. The point of keeping the design system
+Blade + JS ✅ → Livewire ✅ → Vue → React. The point of keeping the design system
 in CSS and the behaviour in framework-free TypeScript is that each of those is a
 thin markup layer, not a rewrite.
+
+The specification lives in [docs/](docs/) — the renderers are written there
+first, then built.
 
 ## Contributing
 
