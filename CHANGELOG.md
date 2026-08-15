@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-15
+
 ### Added
 
 - The rest of the Vue renderer: every Blade component now has an equivalent —
@@ -71,6 +73,7 @@ All notable changes to this project are documented here. The format follows
   Composer refuses to install the earlier versions — supporting them would
   produce an unsolvable dependency set rather than a working install.
 
-[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/marcioelias/my-eyes/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/marcioelias/my-eyes/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/marcioelias/my-eyes/releases/tag/v0.1.0
