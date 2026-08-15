@@ -134,6 +134,30 @@ the custom select, the numeric input, the upload dropzone, dropdowns, modals,
 tooltips and the shell — delegate to `@my-eyes/core`, the same code the Blade
 and Livewire renderers run, so a dropdown behaves identically everywhere.
 
+## With Inertia or vue-router
+
+Every component that renders a link takes `as`, defaulting to `'a'`:
+
+```vue
+<script setup lang="ts">
+import { Link } from '@inertiajs/vue3'
+</script>
+
+<template>
+  <MeNavItem :as="Link" href="/domains" :active="true">Domains</MeNavItem>
+</template>
+```
+
+`MeNavItem`, `MeNavSubitem`, `MeDropdownItem`, `MeBrand` and `MeButton` (with an
+`href`) all accept it. Nothing changes for an application without a router.
+
+The package never detects the router in use — that would tie it to one and
+break everyone on another.
+
+`startMyEyes()` re-binds on `inertia:navigate`, so a page Inertia swaps in
+arrives with its dropdowns, tooltips and modals wired. You should not need to
+call `initMyEyes()` yourself.
+
 Three things differ from Blade on purpose:
 
 - `MeAdminLayout` renders body content, not a document — your application owns

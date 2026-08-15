@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
-import { h } from 'vue'
+import { defineComponent, h, nextTick } from 'vue'
 import {
     MeAlert,
     MeAvatar,
@@ -13,7 +13,10 @@ import {
     MeIcon,
     MeInput,
     MeModal,
+    MeBrand,
+    MeDropdownItem,
     MeNavItem,
+    MeNavSubitem,
     MeNumeric,
     MeProgress,
     MeProgressRing,
@@ -366,5 +369,111 @@ describe('MeNavItem', () => {
 
         // me-hide-collapsed is what the stylesheet keys the icon rail off.
         expect(wrapper.findAll('.me-hide-collapsed')).toHaveLength(2)
+    })
+})
+
+describe('link rendering', () => {
+    // A stand-in for Inertia's Link or vue-router's RouterLink: it renders an
+    // anchor but would, in a real app, navigate client-side.
+    const Link = defineComponent({
+        name: 'Link',
+        props: { href: { type: String, default: '' } },
+        setup: (props, { slots }) => () => h('a', { 'data-link': '', href: props.href }, slots.default?.()),
+    })
+
+    it('renders a plain anchor by default', () => {
+        const wrapper = mount(MeNavItem, { props: { href: '/domains' }, slots: { default: () => 'Domains' } })
+
+        expect(wrapper.element.tagName).toBe('A')
+        expect(wrapper.attributes('data-link')).toBeUndefined()
+    })
+
+    it.each([
+        ['MeNavItem', MeNavItem],
+        ['MeNavSubitem', MeNavSubitem],
+        ['MeDropdownItem', MeDropdownItem],
+        ['MeBrand', MeBrand],
+    ])('%s renders through the component given to "as"', (_name, component) => {
+        const wrapper = mount(component, {
+            props: { as: Link, href: '/domains' },
+            slots: { default: () => 'Domains' },
+        })
+
+        expect(wrapper.find('[data-link]').exists()).toBe(true)
+        expect(wrapper.find('[data-link]').attributes('href')).toBe('/domains')
+    })
+
+    it('MeButton uses "as" only when it links somewhere', () => {
+        const linking = mount(MeButton, { props: { as: Link, href: '/x' }, slots: { default: () => 'Go' } })
+        expect(linking.find('[data-link]').exists()).toBe(true)
+
+        const plain = mount(MeButton, { props: { as: Link }, slots: { default: () => 'Go' } })
+        expect(plain.element.tagName).toBe('BUTTON')
+    })
+
+    it('keeps the my-eyes classes on the substituted component', () => {
+        const wrapper = mount(MeNavItem, { props: { as: Link, href: '/x', active: true } })
+
+        expect(wrapper.find('[data-link]').classes()).toContain('me-nav__item')
+        expect(wrapper.find('[data-link]').attributes('aria-current')).toBe('page')
+    })
+})
+
+describe('MeModal reactive control', () => {
+    it('opens and closes from v-model:open', async () => {
+        const wrapper = mount(MeModal, { props: { id: 'm', open: false, cancel: 'Cancel' }, attachTo: document.body })
+
+        expect((wrapper.element as HTMLDialogElement).open).toBe(false)
+
+        await wrapper.setProps({ open: true })
+        expect((wrapper.element as HTMLDialogElement).open).toBe(true)
+
+        await wrapper.setProps({ open: false })
+        expect((wrapper.element as HTMLDialogElement).open).toBe(false)
+
+        wrapper.unmount()
+    })
+
+    it('reports a dismissal so the parent boolean cannot stick on true', async () => {
+        const wrapper = mount(MeModal, { props: { id: 'm2', open: true }, attachTo: document.body })
+
+        ;(wrapper.element as HTMLDialogElement).close()
+        await nextTick()
+
+        expect(wrapper.emitted('close')).toHaveLength(1)
+        expect(wrapper.emitted('update:open')?.[0]).toEqual([false])
+
+        wrapper.unmount()
+    })
+
+    it('stays DOM-driven when open is never passed', () => {
+        const wrapper = mount(MeModal, { props: { id: 'm3' }, attachTo: document.body })
+
+        expect((wrapper.element as HTMLDialogElement).open).toBe(false)
+        expect(wrapper.emitted('update:open')).toBeUndefined()
+
+        wrapper.unmount()
+    })
+})
+
+describe('MeAlert dismissal', () => {
+    it('does not use the binding that rips the node out of the document', () => {
+        // data-me-dismiss calls target.remove(); this element belongs to Vue.
+        const wrapper = mount(MeAlert, { props: { dismissible: true } })
+
+        expect(wrapper.find('[data-me-dismiss]').exists()).toBe(false)
+        expect(wrapper.find('.me-alert__dismiss').exists()).toBe(true)
+    })
+
+    it('reports the dismissal and hides on v-model:visible', async () => {
+        const wrapper = mount(MeAlert, { props: { dismissible: true, visible: true } })
+
+        await wrapper.find('.me-alert__dismiss').trigger('click')
+
+        expect(wrapper.emitted('dismiss')).toHaveLength(1)
+        expect(wrapper.emitted('update:visible')?.[0]).toEqual([false])
+
+        await wrapper.setProps({ visible: false })
+        expect(wrapper.find('.me-alert').exists()).toBe(false)
     })
 })

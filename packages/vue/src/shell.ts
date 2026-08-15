@@ -1,7 +1,7 @@
 import { initShell, initThemeToggles, t } from '@my-eyes/core'
 import { defineComponent, h, onMounted, ref, type PropType } from 'vue'
 import { MeDropdown, MeDropdownHeader, MeDropdownItem } from './overlays.js'
-import { MeAvatar, MeBadge, MeBrand, MeIcon, type Size } from './primitives.js'
+import { MeAvatar, MeBadge, MeBrand, MeIcon, linkAsProp, type Size } from './primitives.js'
 
 /**
  * The admin shell and its navigation.
@@ -211,19 +211,20 @@ export const MeNavItem = defineComponent({
          */
         active: { type: Boolean, default: false },
         badge: { type: [String, Number] as PropType<string | number | null>, default: null },
+        ...linkAsProp,
     },
 
     setup(props, { slots, attrs }) {
         return () =>
             h(
-                'a',
+                props.as,
                 {
                     ...attrs,
                     href: props.href,
                     class: 'me-nav__item',
                     'aria-current': props.active ? 'page' : undefined,
                 },
-                [
+                () => [
                     props.icon ? h(MeIcon, { name: props.icon as never }) : null,
                     h('span', { class: 'me-hide-collapsed' }, slots.default?.()),
                     props.badge !== null
@@ -242,20 +243,21 @@ export const MeNavSubitem = defineComponent({
     props: {
         href: { type: String, default: '#' },
         active: { type: Boolean, default: false },
+        ...linkAsProp,
     },
 
     setup(props, { slots, attrs }) {
         return () =>
             h('li', [
                 h(
-                    'a',
+                    props.as,
                     {
                         ...attrs,
                         href: props.href,
                         class: 'me-nav__subitem',
                         'aria-current': props.active ? 'page' : undefined,
                     },
-                    slots.default?.(),
+                    () => slots.default?.(),
                 ),
             ])
     },

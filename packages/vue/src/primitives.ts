@@ -1,5 +1,21 @@
 import { icons, type IconName } from '@my-eyes/core'
-import { computed, defineComponent, h, type PropType, type VNode } from 'vue'
+import { computed, defineComponent, h, type Component, type PropType, type VNode } from 'vue'
+
+/**
+ * What a component renders when it links somewhere.
+ *
+ * Defaults to a plain `<a>`, which is right for Blade, for a Vue application
+ * with no router, and for a link that genuinely leaves the app. Pass Inertia's
+ * `Link`, or `RouterLink`, to keep client-side navigation:
+ *
+ *   <MeNavItem :as="Link" href="/domains">Domains</MeNavItem>
+ *
+ * The package deliberately does not detect the router in use. That would tie
+ * it to one and break everyone on another.
+ */
+export type LinkAs = string | Component
+
+export const linkAsProp = { as: { type: [String, Object, Function] as PropType<LinkAs>, default: 'a' } }
 
 /**
  * Display primitives.
@@ -72,8 +88,9 @@ export const MeButton = defineComponent({
         loading: { type: Boolean, default: false },
         disabled: { type: Boolean, default: false },
         type: { type: String as PropType<'button' | 'submit' | 'reset'>, default: 'button' },
-        /** Renders an anchor instead, for a button that navigates. */
+        /** Renders a link instead, for a button that navigates. */
         href: { type: String as PropType<string | null>, default: null },
+        ...linkAsProp,
     },
 
     setup(props, { slots, attrs }) {
@@ -92,7 +109,7 @@ export const MeButton = defineComponent({
             ]
 
             if (props.href !== null) {
-                return h('a', { ...attrs, href: props.href, class: classes.value }, children)
+                return h(props.as, { ...attrs, href: props.href, class: classes.value }, () => children)
             }
 
             return h(
@@ -148,10 +165,21 @@ export const MeAlert = defineComponent({
         icon: { type: [String, Boolean] as PropType<IconName | false | null>, default: null },
         dismissible: { type: Boolean, default: false },
         dismissLabel: { type: String, default: 'Dismiss' },
+        /** Two-way, through `v-model:visible`. */
+        visible: { type: Boolean, default: true },
     },
 
-    setup(props, { slots, attrs }) {
+    emits: {
+        dismiss: () => true,
+        'update:visible': (_visible: boolean) => true,
+    },
+
+    setup(props, { slots, emit, attrs }) {
         return () => {
+            if (!props.visible) {
+                return null
+            }
+
             const icon = props.icon === null ? (ALERT_ICONS[props.variant] ?? 'info') : props.icon
 
             return h('div', { ...attrs, class: ['me-alert', `me-alert--${props.variant}`], role: 'alert' }, [
@@ -162,14 +190,23 @@ export const MeAlert = defineComponent({
                     h('span', { class: 'me-alert__text' }, slots.default?.()),
                 ]),
 
+                /*
+                 * Deliberately NOT data-me-dismiss. That binding removes the
+                 * element from the document, and this element belongs to Vue —
+                 * tearing it out from underneath corrupts the next patch. Vue
+                 * owns the dismissal here, and the parent hears about it.
+                 */
                 props.dismissible
                     ? h(
                           'button',
                           {
                               type: 'button',
                               class: 'me-alert__dismiss',
-                              'data-me-dismiss': '',
                               'aria-label': props.dismissLabel,
+                              onClick: () => {
+                                  emit('dismiss')
+                                  emit('update:visible', false)
+                              },
                           },
                           [h(MeIcon, { name: 'x' })],
                       )
@@ -365,11 +402,12 @@ export const MeBrand = defineComponent({
         href: { type: String, default: '/' },
         name: { type: String as PropType<string | null>, default: null },
         showName: { type: Boolean, default: true },
+        ...linkAsProp,
     },
 
     setup(props, { slots, attrs }) {
         return () =>
-            h('a', { ...attrs, href: props.href, class: 'me-sidebar__brand' }, [
+            h(props.as, { ...attrs, href: props.href, class: 'me-sidebar__brand' }, () => [
                 slots.default?.() ?? defaultGlyph(),
                 props.showName ? h('span', { class: 'me-hide-collapsed' }, props.name ?? '') : null,
             ])

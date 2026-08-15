@@ -6,6 +6,32 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `as` on every Vue component that renders a link — `MeNavItem`,
+  `MeNavSubitem`, `MeDropdownItem`, `MeBrand` and `MeButton` with an `href`.
+  It defaults to `'a'`, so nothing changes for Blade or for a Vue application
+  without a router; pass Inertia's `Link` or `RouterLink` to keep navigation
+  client-side. The package does not detect the router in use — that would tie
+  it to one and break everyone on another.
+- `startMyEyes()` re-binds after `inertia:navigate`, alongside the Livewire and
+  Turbo hooks it already had. An Inertia page arrived unbound before, and every
+  application had to call `initMyEyes()` itself.
+- `MeModal` takes `v-model:open` and emits `close`, so a dialog can be driven
+  from state instead of only from `data-me-modal-open`. Dismissal is reported
+  however it happened, so a parent's boolean cannot be left stuck on true.
+- `MeAlert` takes `v-model:visible` and emits `dismiss`.
+- `MeDropdown` emits `update:open`.
+- `useTheme()` — the colour scheme as reactive state, for a chart or a canvas
+  that needs its own palette.
+- `openModal` is exported from `@my-eyes/core`.
+
+### Fixed
+
+- A dismissible `MeAlert` carried `data-me-dismiss`, whose binding removes the
+  element from the document. That element belongs to Vue, and tearing it out
+  from underneath corrupts the next patch. Vue now owns the dismissal.
+
 ## [0.3.0] - 2026-08-15
 
 ### Added

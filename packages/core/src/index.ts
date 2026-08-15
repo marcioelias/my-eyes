@@ -34,7 +34,7 @@ export * from './icons.js'
 export { initDropdowns } from './dom/dropdown.js'
 export { initFilterPanels, initFilters } from './dom/filters.js'
 export { initDismissables, initNavigateSelects, initPasswordToggles, initThemeToggles } from './dom/misc.js'
-export { initModals } from './dom/modal.js'
+export { initModals, openModal } from './dom/modal.js'
 export { initNumericInputs } from './dom/numeric-input.js'
 export { initSelects } from './dom/select.js'
 export { initShell } from './dom/shell.js'
@@ -70,9 +70,14 @@ export function initMyEyes(root: ParentNode = document): void {
 }
 
 /**
- * Runs initMyEyes now (or on DOMContentLoaded) and re-runs it after Livewire
- * or Turbo swap DOM, which is what makes the same components work unchanged
- * across Blade, Livewire and Turbo pages.
+ * Runs initMyEyes now (or on DOMContentLoaded) and re-runs it whenever
+ * something swaps the DOM underneath — Livewire, Turbo or Inertia. That is
+ * what makes the same components work unchanged across all of them.
+ *
+ * Inertia is listened for as a plain DOM event rather than through
+ * `router.on()`: this package must not depend on a routing framework, and
+ * `inertia:navigate` is dispatched on `document` regardless of which adapter
+ * the application uses.
  */
 export function startMyEyes(): void {
     const run = (): void => initMyEyes(document)
@@ -85,6 +90,7 @@ export function startMyEyes(): void {
 
     document.addEventListener('livewire:navigated', run)
     document.addEventListener('turbo:load', run)
+    document.addEventListener('inertia:navigate', run)
 
     /*
      * Re-run after a Livewire re-render. The hook name differs between
