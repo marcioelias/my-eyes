@@ -573,7 +573,9 @@ in CSS and the behaviour in framework-free TypeScript is that each of those is a
 thin markup layer, not a rewrite.
 
 The specification lives in [docs/](docs/) — the renderers are written there
-first, then built.
+first, then built. [docs/llm-reference.md](docs/llm-reference.md) is the whole
+public surface in one file, written to be fed to a coding assistant so it stops
+inventing APIs this package does not have.
 
 ## Contributing
 

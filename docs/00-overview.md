@@ -40,6 +40,14 @@ Out of scope, permanently:
 | **Schema** | The filterable-column description the filter builder is driven by |
 | **Condition** | One filter row: field, operator, values |
 
+## Reference
+
+`llm-reference.md` is the complete public surface in one self-contained file —
+every component and its props, the PHP API, the payload, the JavaScript exports,
+and an explicit list of what does *not* exist. It is written to be handed to a
+language model or loaded into an MCP server, and it is the file to update when
+the surface changes.
+
 ## Status
 
 | Renderer | Status |

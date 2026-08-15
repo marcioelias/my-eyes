@@ -56,6 +56,7 @@ return [
         'sort_desc' => 'Sorted descending',
         'previous' => 'Previous',
         'next' => 'Next',
+        'retry' => 'Retry',
     ],
 
 ];

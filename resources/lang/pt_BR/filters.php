@@ -56,6 +56,7 @@ return [
         'sort_desc' => 'Ordenado decrescente',
         'previous' => 'Anterior',
         'next' => 'Próxima',
+        'retry' => 'Tentar novamente',
     ],
 
 ];

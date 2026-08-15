@@ -57,6 +57,27 @@ final class Messages
             'select.placeholder' => __('my-eyes::ui.select.placeholder'),
             'select.selected' => __('my-eyes::ui.select.selected'),
             'select.clear' => __('my-eyes::ui.select.clear'),
+            /*
+             * Blade and Livewire render the table chrome server-side, so these
+             * only reach the screen through the Vue and React tables. They are
+             * exported all the same: one translation file has to serve every
+             * renderer, and a Blade application that mounts a Vue table on one
+             * page should not have to translate it twice.
+             */
+            'filters.title' => __('my-eyes::filters.ui.title'),
+            'filters.add' => __('my-eyes::filters.ui.add'),
+            'filters.apply' => __('my-eyes::filters.ui.apply'),
+            'filters.clear' => __('my-eyes::filters.ui.clear'),
+            'filters.empty' => __('my-eyes::filters.ui.empty'),
+            'table.search' => __('my-eyes::filters.table.search'),
+            'table.perPage' => __('my-eyes::filters.table.per_page'),
+            'table.showing' => __('my-eyes::filters.table.showing'),
+            'table.empty' => __('my-eyes::filters.table.empty'),
+            'table.emptyFiltered' => __('my-eyes::filters.table.empty_filtered'),
+            'table.previous' => __('my-eyes::filters.table.previous'),
+            'table.next' => __('my-eyes::filters.table.next'),
+            'table.retry' => __('my-eyes::filters.table.retry'),
+            'pagination.label' => __('my-eyes::ui.pagination.label'),
         ];
     }
 }
