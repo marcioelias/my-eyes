@@ -30,14 +30,18 @@ jobs:
 
       - run: npm ci
 
+      # Build first. Every package downstream of @my-eyes/core resolves it
+      # through its published entry points — dist/index.js and dist/index.d.ts —
+      # so without this both the typecheck and the tests fail on a module that
+      # simply has not been emitted yet. Workspaces build in dependency order.
+      - name: Build
+        run: npm run build --workspaces --if-present
+
       - name: Typecheck
         run: npm run typecheck --workspaces --if-present
 
       - name: Test
         run: npm test
-
-      - name: Build
-        run: npm run build --workspaces --if-present
 
       # Compiling the stylesheet through Tailwind is the only way to catch a
       # broken @apply, an unknown token or a malformed selector.
