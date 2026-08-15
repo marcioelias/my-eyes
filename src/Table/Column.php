@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace MyEyes\Table;
 
+use BackedEnum;
 use Closure;
+use DateTimeInterface;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
+use JsonSerializable;
 use MyEyes\Filters\Condition;
 use MyEyes\Filters\FilterType;
 use MyEyes\Filters\Operator;
@@ -37,6 +42,8 @@ final class Column
     private ?Closure $format = null;
 
     private ?string $view = null;
+
+    private bool $html = false;
 
     /**
      * The database column, when it differs from the key used for display.
@@ -137,6 +144,26 @@ final class Column
         $this->view = $view;
 
         return $this;
+    }
+
+    /**
+     * Marks this column's values as markup rather than text.
+     *
+     * Only meaningful for clients that render from the payload — Vue and
+     * React. It is opt-in per column, and deliberately so: this is the one
+     * place a table can inject markup into the page, and that has to be a
+     * decision someone made, not a default.
+     */
+    public function html(bool $html = true): self
+    {
+        $this->html = $html;
+
+        return $this;
+    }
+
+    public function isHtml(): bool
+    {
+        return $this->html;
     }
 
     /**
@@ -255,21 +282,121 @@ final class Column
     }
 
     /**
-     * Resolves the cell's content for a row.
+     * Resolves the cell's content for a row, as Blade renders it.
      */
     public function render(mixed $row): string|Htmlable|null
     {
+        if ($this->view !== null) {
+            return $this->renderView($row);
+        }
+
+        $value = $this->resolve($row);
+
+        return match (true) {
+            $value === null, $value instanceof Htmlable => $value,
+            $value instanceof BackedEnum => (string) $value->value,
+            default => (string) $value,
+        };
+    }
+
+    /**
+     * The raw cell value: the row's data for this key, through format() when
+     * one is set. Shared by render() and toValue(), which then differ only in
+     * how they present it.
+     */
+    private function resolve(mixed $row): mixed
+    {
         $value = data_get($row, $this->key);
 
+        return $this->format !== null ? ($this->format)($value, $row) : $value;
+    }
+
+    /**
+     * Wrapped in an HtmlString rather than handed back as a View: both are
+     * Htmlable, so Blade emits the markup either way, but this one is also
+     * something the payload can carry once the column opts in with html().
+     */
+    private function renderView(mixed $row): HtmlString
+    {
+        /** @var string $view */
+        $view = $this->view;
+
+        return new HtmlString(
+            view($view, ['row' => $row, 'value' => data_get($row, $this->key), 'column' => $this])->render()
+        );
+    }
+
+    /**
+     * The cell's value for a row, as something JSON can carry.
+     *
+     * Server-rendering constructs — a Blade view, an Htmlable — only mean
+     * something once the column has opted into markup with html(). Without
+     * that, sending them would silently turn escaped output into raw output on
+     * the client, so this throws instead.
+     *
+     * @see docs/policies/table-payload.md P-04 to P-07
+     */
+    public function toValue(mixed $row): mixed
+    {
         if ($this->view !== null) {
-            return view($this->view, ['row' => $row, 'value' => $value, 'column' => $this]);
+            return $this->markup($this->renderView($row));
         }
 
-        if ($this->format !== null) {
-            return ($this->format)($value, $row);
+        $value = $this->resolve($row);
+
+        if ($value instanceof Htmlable) {
+            return $this->markup($value);
         }
 
-        return $value === null ? null : (string) $value;
+        return self::serialise($value, $this->key);
+    }
+
+    private function markup(Htmlable $rendered): string
+    {
+        if (! $this->html) {
+            throw UnserialisableColumn::markup($this->key);
+        }
+
+        return $rendered->toHtml();
+    }
+
+    /**
+     * Normalises the values Eloquent hands back that JSON has no notion of.
+     *
+     * Dates and enums are common enough on a model that refusing them would be
+     * a footgun rather than a safeguard. Anything beyond these is a column
+     * definition mistake and says so.
+     */
+    private static function serialise(mixed $value, string $key): mixed
+    {
+        return match (true) {
+            $value === null, is_scalar($value) => $value,
+            $value instanceof BackedEnum => $value->value,
+            $value instanceof DateTimeInterface => $value->format(DateTimeInterface::ATOM),
+            is_array($value) => $value,
+            $value instanceof Arrayable => $value->toArray(),
+            $value instanceof JsonSerializable => $value->jsonSerialize(),
+            default => throw UnserialisableColumn::value($key, get_debug_type($value)),
+        };
+    }
+
+    /**
+     * The column's description in the payload, for clients that render from
+     * data rather than from markup.
+     *
+     * @return array{key: string, label: string, align: string, sortable: bool, searchable: bool, filterable: bool, html: bool}
+     */
+    public function toPayload(): array
+    {
+        return [
+            'key' => $this->key,
+            'label' => $this->label,
+            'align' => $this->align,
+            'sortable' => $this->sortable,
+            'searchable' => $this->searchable,
+            'filterable' => $this->filterable,
+            'html' => $this->html,
+        ];
     }
 
     /**

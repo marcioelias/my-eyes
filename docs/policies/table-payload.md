@@ -28,7 +28,7 @@ renderers speak exactly this; neither may extend it privately.
   "search": "ana",
 
   "filters": {
-    "conditions": [{ "field": "status", "operator": "equals", "values": ["active"] }],
+    "conditions": [{ "field": "status", "operator": "eq", "values": ["active"] }],
     "conjunction": "and"
   },
 
@@ -54,7 +54,7 @@ vocabulary, three renderers:
 
 ```
 ?sort=name&direction=asc&per_page=25&q=ana&page=2
-&filters[0][field]=status&filters[0][operator]=equals&filters[0][values][0]=active
+&filters[0][field]=status&filters[0][operator]=eq&filters[0][values][0]=active
 &conjunction=and
 ```
 
@@ -70,10 +70,14 @@ vocabulary, three renderers:
 
 ## Cell values
 
-Rows carry **JSON-safe scalars**, not markup. `null` stays `null`.
+Rows carry **JSON-safe values**, not markup. `null` stays `null`.
 
 - **P-04** — A column's value is `data_get($row, $key)`, passed through its
-  `format()` closure when one is set.
+  `format()` closure when one is set, then normalised: a `DateTimeInterface`
+  becomes an ISO 8601 string, a backed enum becomes its value, an `Arrayable`
+  or `JsonSerializable` becomes its array form, and scalars pass through. A
+  value that is none of these throws, naming the column — it is a column
+  definition mistake, not something to encode by guessing.
 - **P-05** — A column whose value resolves to a Blade view or `Htmlable` is a
   server-rendering construct and has no meaning here. Building a payload from
   one throws, naming the column. It does not silently disappear.

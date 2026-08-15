@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyEyes\Table;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -42,7 +43,7 @@ use MyEyes\Filters\FilterSet;
  * Nothing here is required: a table with no sortable, filterable or searchable
  * column simply renders rows and pagination.
  */
-final class Table
+final class Table implements Jsonable
 {
     /** @var array<string, Column> */
     private array $columns = [];
@@ -360,6 +361,81 @@ final class Table
     private function urlWith(array $parameters): string
     {
         return $this->request()->fullUrlWithQuery($parameters);
+    }
+
+    /**
+     * The table as data, for clients that render rows themselves rather than
+     * receiving markup — the Vue and React components.
+     *
+     * The state reported here is the state that was *applied*, not the state
+     * that was requested: a sort on a column that is not sortable, or a page
+     * size outside the offered options, is already gone by the time it reaches
+     * this method. Clients render their controls from this, which is what
+     * keeps them honest when the server rejects something.
+     *
+     * @see docs/policies/table-payload.md
+     *
+     * @return array<string, mixed>
+     */
+    public function toPayload(): array
+    {
+        $paginator = $this->paginator();
+
+        return [
+            'columns' => array_values(array_map(
+                static fn (Column $column): array => $column->toPayload(),
+                $this->columns,
+            )),
+            'rows' => $this->rows()
+                ->map(fn (mixed $row): array => $this->rowPayload($row))
+                ->all(),
+            'sort' => [
+                'key' => $this->sortKey(),
+                'direction' => $this->sortDirection(),
+            ],
+            'search' => $this->search(),
+            'filters' => [
+                'conditions' => $this->filters()->toQuery(),
+                'conjunction' => $this->filters()->conjunction,
+            ],
+            'schema' => $this->filterSchema(),
+            'pagination' => [
+                'page' => $paginator->currentPage(),
+                'perPage' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'lastPage' => $paginator->lastPage(),
+                'from' => $paginator->firstItem(),
+                'to' => $paginator->lastItem(),
+            ],
+            'perPageOptions' => $this->perPageOptions,
+        ];
+    }
+
+    /**
+     * Only declared columns reach the client, so an attribute the table never
+     * exposed cannot leak through the payload.
+     *
+     * @return array<string, mixed>
+     */
+    private function rowPayload(mixed $row): array
+    {
+        $values = [];
+
+        foreach ($this->columns as $key => $column) {
+            $values[$key] = $column->toValue($row);
+        }
+
+        return $values;
+    }
+
+    /**
+     * Lets a route return the table directly — Laravel turns a Jsonable into a
+     * JSON response on its own, so the application needs no controller of its
+     * own to serve one.
+     */
+    public function toJson($options = 0): string
+    {
+        return json_encode($this->toPayload(), $options | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 
     /**

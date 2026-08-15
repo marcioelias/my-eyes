@@ -32,7 +32,7 @@ Three options were considered:
 
 Option 3.
 
-`MyEyes\Table\Table` gains `toPayload(): array` and `toJson(): JsonResponse`.
+`MyEyes\Table\Table` gains `toPayload(): array` and implements `Jsonable`.
 The application exposes whatever route it wants and applies its own middleware,
 policies and rate limits there.
 
@@ -41,10 +41,15 @@ Route::get('/users/table', function () {
     Gate::authorize('viewAny', User::class);
 
     return Table::make(User::query(), $columns)
-        ->defaultSort('created_at', 'desc')
-        ->toJson();
+        ->defaultSort('created_at', 'desc');
 })->middleware('auth');
 ```
+
+`Table` implements Laravel's `Jsonable` rather than returning a `JsonResponse`:
+it is the contract the router already understands, it keeps `illuminate/http`
+out of the method signature, and it leaves the application free to wrap the
+payload — `response()->json($table->toPayload(), 200, $headers)` — when it
+needs to.
 
 The Vue and React components take an `endpoint` and speak that contract.
 
