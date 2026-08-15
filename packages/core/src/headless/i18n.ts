@@ -22,6 +22,9 @@ export type MessageKey =
     | 'upload.tooLarge'
     | 'upload.wrongType'
     | 'upload.tooMany'
+    | 'upload.drop'
+    | 'upload.browse'
+    | 'upload.upTo'
     | 'filters.where'
     | 'filters.and'
     | 'filters.or'
@@ -50,6 +53,17 @@ export type MessageKey =
     | 'table.next'
     | 'table.retry'
     | 'pagination.label'
+    | 'layout.skip'
+    | 'layout.openMenu'
+    | 'layout.closeMenu'
+    | 'layout.mainNav'
+    | 'layout.collapse'
+    | 'layout.toggleTheme'
+    | 'layout.accountMenu'
+    | 'layout.theme'
+    | 'layout.system'
+    | 'layout.light'
+    | 'layout.dark'
 
 export type Messages = Record<MessageKey, string>
 
@@ -61,6 +75,9 @@ const defaults: Messages = {
     'upload.tooLarge': ':name is larger than :limit',
     'upload.wrongType': ':name is not an accepted file type',
     'upload.tooMany': 'At most :limit files',
+    'upload.drop': 'Drop files here or :browse',
+    'upload.browse': 'browse',
+    'upload.upTo': 'up to :size',
     'filters.where': 'Where',
     'filters.and': 'and',
     'filters.or': 'or',
@@ -91,6 +108,19 @@ const defaults: Messages = {
     'table.next': 'Next',
     'table.retry': 'Retry',
     'pagination.label': 'Pagination',
+    // The admin shell. Blade renders these server-side; they reach the screen
+    // only through the Vue shell.
+    'layout.skip': 'Skip to content',
+    'layout.openMenu': 'Open menu',
+    'layout.closeMenu': 'Close menu',
+    'layout.mainNav': 'Main navigation',
+    'layout.collapse': 'Collapse',
+    'layout.toggleTheme': 'Toggle theme',
+    'layout.accountMenu': 'Account menu',
+    'layout.theme': 'Theme',
+    'layout.system': 'System',
+    'layout.light': 'Light',
+    'layout.dark': 'Dark',
 }
 
 let messages: Messages = { ...defaults }

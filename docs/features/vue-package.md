@@ -37,7 +37,11 @@ with or without Inertia.
   a consumer bundles only what is used.
 - **BR-05** — Translations come from the same message catalogue the core uses
   (`headless/i18n`), seeded by the host application. No strings are hardcoded
-  in a component.
+  in a component. A key added for a Vue component is added to
+  `MyEyes\Support\Messages` in the same change; a Pest test fails otherwise.
+- **BR-05a** — The icon set is declared once in `@my-eyes/core`
+  (`src/icons.ts`) and mirrored by the Blade component. A Pest test asserts the
+  two carry the same names, so neither can gain an icon the other lacks.
 
 ### Table
 
@@ -75,17 +79,26 @@ New package: `packages/vue`, published as `@my-eyes/vue`.
 
 | Export | Purpose |
 |---|---|
-| `MeTable` | The data table |
-| `MeFilters` | The filter builder |
-| `MePagination` | Pagination for a payload |
-| `MeButton`, `MeBadge`, `MeAlert`, `MeInput`, `MeField` | The primitives the table leans on |
+| `MeTable`, `MeFilters`, `MePagination` | The data table, its filter builder and its pagination |
 | `useTable(options)` | The table's state machine, usable without `MeTable` |
+| `MeButton`, `MeBadge`, `MeAlert`, `MeCard`, `MeAvatar`, `MeIcon`, `MeProgress`, `MeProgressRing`, `MeBrand` | Display |
+| `MeField`, `MeInput`, `MeTextarea`, `MeSelect`, `MeSelectField`, `MeCheckbox`, `MeRadio`, `MeSwitch`, `MeNumeric`, `MeUpload` | Form controls |
+| `MeModal`, `MeDropdown` (+ `Item`, `Header`, `Divider`), `MeTooltip`, `MeToasts`, `useToasts()` | Overlays |
+| `MeAdminLayout`, `MeNavSection`, `MeNavGroup`, `MeNavItem`, `MeNavSubitem`, `MeUserMenu`, `MeThemeToggle`, `MeThemeMenu` | The admin shell |
 
-Not ported yet, and deliberately so — the table was the part that could not be
-reached any other way: modal, toasts, tooltip, dropdown, custom select, upload
-and the admin shell. Their behaviour already lives in `@my-eyes/core`'s DOM
-bindings and works against my-eyes markup rendered by hand, so nothing is
-blocked meanwhile.
+Every Blade component the showcase demonstrates now has a Vue equivalent.
+
+Three differences are deliberate rather than gaps:
+
+- **`MeAdminLayout` renders body content, not a document.** The Blade layout
+  emits `<html>` and `<head>`; a Vue application owns those, and Inertia owns
+  the page shell.
+- **`MeNavItem` takes `active` explicitly.** The Blade component defaults it to
+  a URL comparison; a Vue application knows its current route, and a component
+  has no business guessing it.
+- **`MeModal` emits `confirm`** rather than submitting a form. There is no CSRF
+  token and no method spoofing, because a Vue application submits through its
+  own client.
 
 ## Contracts
 
@@ -175,6 +188,8 @@ BR-07.
 - SSR of the table's first page — the component fetches on mount
 - Infinite scroll as a paging mode
 - Row selection and bulk actions
+- The starter-kit screens (login, registration, password reset). They exist as
+  Blade views only; the components to build them from are all here
 - Vue 2
 
 ## Open Questions

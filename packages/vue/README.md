@@ -121,12 +121,59 @@ configureMessages({ 'table.search': 'Buscar', 'table.empty': 'Nenhum registro' }
 
 ## Components
 
-`MeTable`, `MeFilters`, `MePagination`, `MeButton`, `MeBadge`, `MeAlert`,
-`MeInput`, `MeField`.
+| | |
+|---|---|
+| **Table** | `MeTable` `MeFilters` `MePagination` `useTable` |
+| **Display** | `MeButton` `MeBadge` `MeAlert` `MeCard` `MeAvatar` `MeIcon` `MeProgress` `MeProgressRing` `MeBrand` |
+| **Form** | `MeField` `MeInput` `MeTextarea` `MeSelect` `MeSelectField` `MeCheckbox` `MeRadio` `MeSwitch` `MeNumeric` `MeUpload` |
+| **Overlay** | `MeModal` `MeDropdown` `MeDropdownItem` `MeDropdownHeader` `MeDropdownDivider` `MeTooltip` `MeToasts` `useToasts` |
+| **Shell** | `MeAdminLayout` `MeNavSection` `MeNavGroup` `MeNavItem` `MeNavSubitem` `MeUserMenu` `MeThemeToggle` `MeThemeMenu` |
 
-The remaining Blade components — modal, toasts, tooltip, dropdown, upload, the
-admin shell — are not ported yet. Their behaviour already lives in
-`@my-eyes/core` and works against my-eyes markup you render yourself.
+Every form control supports `v-model`. The ones that carry real behaviour —
+the custom select, the numeric input, the upload dropzone, dropdowns, modals,
+tooltips and the shell — delegate to `@my-eyes/core`, the same code the Blade
+and Livewire renderers run, so a dropdown behaves identically everywhere.
+
+Three things differ from Blade on purpose:
+
+- `MeAdminLayout` renders body content, not a document — your application owns
+  `<html>` and `<head>`
+- `MeNavItem` takes `active` explicitly instead of comparing URLs
+- `MeModal` emits `confirm` instead of submitting a form
+
+```vue
+<MeAdminLayout heading="Users">
+  <template #nav>
+    <MeNavSection title="Manage">
+      <MeNavItem href="/users" icon="users" :active="true">Users</MeNavItem>
+    </MeNavSection>
+  </template>
+
+  <template #user>
+    <MeUserMenu name="Márcio Elias" email="marcio@example.com">
+      <MeDropdownItem href="/profile" icon="user">Profile</MeDropdownItem>
+    </MeUserMenu>
+  </template>
+
+  <MeCard title="Recent">
+    <MeTable endpoint="/users/table" />
+  </MeCard>
+</MeAdminLayout>
+```
+
+Toasts, from anywhere:
+
+```ts
+const toasts = useToasts()
+toasts.success('Saved')
+```
+
+Place `<MeToasts />` once in the layout for them to appear in.
+
+## Not included
+
+The starter-kit screens — login, registration, password reset — ship as Blade
+views only. Every component needed to build them is here.
 
 ## Licence
 

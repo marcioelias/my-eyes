@@ -330,9 +330,11 @@ class Dashboard extends Component
 
 ### Vue
 
-`@my-eyes/vue` ships the same table for Vue 3 — server-paginated, with pages
-already fetched served from memory and rows outside the viewport kept out of
-the DOM. See [packages/vue/README.md](packages/vue/README.md).
+`@my-eyes/vue` ships the whole design system for Vue 3 — every component on
+this page has an equivalent, including the admin shell — and the same
+server-paginated table, with pages already fetched served from memory and rows
+outside the viewport kept out of the DOM.
+See [packages/vue/README.md](packages/vue/README.md).
 
 ```vue
 <MeTable endpoint="/users/table">

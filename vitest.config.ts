@@ -6,5 +6,6 @@ export default defineConfig({
         // is exactly the behaviour worth testing rather than mocking away.
         environment: 'jsdom',
         include: ['packages/*/tests/**/*.test.ts', 'packages/*/tests/**/*.test.tsx'],
+        setupFiles: ['packages/vue/tests/setup.ts'],
     },
 })

@@ -120,3 +120,23 @@ it('keeps every javascript message key in sync with the core dictionary', functi
 
     expect($phpKeys)->toBe($coreKeys);
 });
+
+it('keeps the icon set in sync between Blade and the core dictionary', function () {
+    // The two sets are written out separately — one in PHP for server
+    // rendering, one in TypeScript for the components that draw icons in the
+    // browser. A name in one and not the other is a blank icon at runtime.
+    $blade = file_get_contents(__DIR__.'/../resources/views/components/icon.blade.php');
+    $core = file_get_contents(__DIR__.'/../packages/core/src/icons.ts');
+
+    preg_match_all("/^        '([a-z-]+)' =>/m", (string) $blade, $bladeMatches);
+    preg_match_all("/^    '([a-z-]+)':/m", (string) $core, $coreMatches);
+
+    $bladeIcons = $bladeMatches[1];
+    $coreIcons = $coreMatches[1];
+
+    sort($bladeIcons);
+    sort($coreIcons);
+
+    expect($coreIcons)->toBe($bladeIcons)
+        ->and($bladeIcons)->not->toBeEmpty();
+});
