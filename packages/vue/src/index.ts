@@ -61,6 +61,8 @@ export {
 
 export {
     MeAdminLayout,
+    MeAuthLayout,
+    MeErrorLayout,
     MeNavGroup,
     MeNavItem,
     MeNavSection,

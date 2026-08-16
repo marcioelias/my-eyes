@@ -6,6 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-08-15
+
+### Added
+
+- `MeAuthLayout` and `MeErrorLayout`, the last two Blade components without a
+  Vue equivalent. Like `MeAdminLayout` they render body content rather than a
+  document.
+- `MePagination` takes `hrefFor`, turning its items into real links so
+  middle-click and "open in new tab" work. A plain click still fetches without
+  reloading, and a modified click is left to the browser. Without it the items
+  stay buttons, which is right when the pages have no addresses.
+- A test that counts Blade components against Vue exports. Parity had been
+  claimed by hand and was wrong; a count cannot drift.
+
 ## [0.3.1] - 2026-08-15
 
 ### Added
@@ -101,7 +115,8 @@ All notable changes to this project are documented here. The format follows
   Composer refuses to install the earlier versions — supporting them would
   produce an unsolvable dependency set rather than a working install.
 
-[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/marcioelias/my-eyes/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/marcioelias/my-eyes/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/marcioelias/my-eyes/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/marcioelias/my-eyes/compare/v0.1.0...v0.2.0

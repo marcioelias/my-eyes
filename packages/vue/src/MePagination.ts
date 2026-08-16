@@ -1,5 +1,6 @@
 import { t, type TablePagination } from '@my-eyes/core'
 import { defineComponent, h, type PropType, type VNode } from 'vue'
+import { linkAsProp } from './primitives.js'
 
 /**
  * Pagination for a table payload.
@@ -14,6 +15,18 @@ export const MePagination = defineComponent({
     props: {
         pagination: { type: Object as PropType<TablePagination>, required: true },
         window: { type: Number, default: 1 },
+        /**
+         * Builds an href for a page, turning the items into real links.
+         *
+         * Without it the items are buttons, which is the honest default: they
+         * fetch a page rather than navigating, and a link that does not
+         * navigate misleads assistive technology. Supply it when the pages do
+         * have addresses — the table already mirrors its state into the URL —
+         * and middle-click and "open in new tab" start working. A plain click
+         * still fetches, without a reload.
+         */
+        hrefFor: { type: Function as PropType<(page: number) => string>, required: false },
+        ...linkAsProp,
     },
 
     emits: {
@@ -21,6 +34,40 @@ export const MePagination = defineComponent({
     },
 
     setup(props, { emit }) {
+        /*
+         * One item, rendered as a link when the consumer can name an address
+         * for the page and as a button otherwise. A modified click — new tab,
+         * new window, a chosen download — is left to the browser; a plain one
+         * fetches without reloading.
+         */
+        const item = (target: number, options: { class: string; label?: string; disabled?: boolean; current?: boolean; children: VNode[] | string; key?: string | number }): VNode => {
+            const onActivate = (event: MouseEvent): void => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+                    return
+                }
+
+                event.preventDefault()
+                emit('navigate', target)
+            }
+
+            const shared = {
+                key: options.key ?? target,
+                class: options.class,
+                'aria-label': options.label,
+                'aria-current': options.current ? ('page' as const) : undefined,
+            }
+
+            if (props.hrefFor === undefined || options.disabled) {
+                return h(
+                    'button',
+                    { ...shared, type: 'button', disabled: options.disabled, onClick: () => emit('navigate', target) },
+                    options.children,
+                )
+            }
+
+            return h(props.as, { ...shared, href: props.hrefFor(target), onClick: onActivate }, () => options.children)
+        }
+
         return () => {
             const { page, lastPage } = props.pagination
 
@@ -34,17 +81,13 @@ export const MePagination = defineComponent({
             )
 
             const children: VNode[] = [
-                h(
-                    'button',
-                    {
-                        type: 'button',
-                        class: 'me-pagination__item',
-                        'aria-label': t('table.previous'),
-                        disabled: page <= 1,
-                        onClick: () => emit('navigate', page - 1),
-                    },
-                    [chevron(true)],
-                ),
+                item(page - 1, {
+                    key: 'previous',
+                    class: 'me-pagination__item',
+                    label: t('table.previous'),
+                    disabled: page <= 1,
+                    children: [chevron(true)],
+                }),
             ]
 
             let previous = 0
@@ -57,34 +100,24 @@ export const MePagination = defineComponent({
                 }
 
                 children.push(
-                    h(
-                        'button',
-                        {
-                            key: candidate,
-                            type: 'button',
-                            class: 'me-pagination__item me-pagination__item--number',
-                            'aria-current': candidate === page ? 'page' : undefined,
-                            onClick: () => emit('navigate', candidate),
-                        },
-                        String(candidate),
-                    ),
+                    item(candidate, {
+                        class: 'me-pagination__item me-pagination__item--number',
+                        current: candidate === page,
+                        children: String(candidate),
+                    }),
                 )
 
                 previous = candidate
             })
 
             children.push(
-                h(
-                    'button',
-                    {
-                        type: 'button',
-                        class: 'me-pagination__item',
-                        'aria-label': t('table.next'),
-                        disabled: page >= lastPage,
-                        onClick: () => emit('navigate', page + 1),
-                    },
-                    [chevron(false)],
-                ),
+                item(page + 1, {
+                    key: 'next',
+                    class: 'me-pagination__item',
+                    label: t('table.next'),
+                    disabled: page >= lastPage,
+                    children: [chevron(false)],
+                }),
             )
 
             return h(

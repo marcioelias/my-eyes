@@ -1,7 +1,7 @@
 import { initShell, initThemeToggles, t } from '@my-eyes/core'
 import { defineComponent, h, onMounted, ref, type PropType } from 'vue'
 import { MeDropdown, MeDropdownHeader, MeDropdownItem } from './overlays.js'
-import { MeAvatar, MeBadge, MeBrand, MeIcon, linkAsProp, type Size } from './primitives.js'
+import { MeAvatar, MeBadge, MeBrand, MeButton, MeCard, MeIcon, linkAsProp, type Size } from './primitives.js'
 
 /**
  * The admin shell and its navigation.
@@ -380,3 +380,115 @@ export const MeUserMenu = defineComponent({
 })
 
 export { MeDropdownItem }
+
+/**
+ * Centred single-column layout for login, registration and password screens.
+ *
+ * Like MeAdminLayout this renders body content rather than a document: the
+ * Blade version emits <html> and <head>, which a Vue application owns.
+ */
+export const MeAuthLayout = defineComponent({
+    name: 'MeAuthLayout',
+
+    props: {
+        heading: { type: String as PropType<string | null>, default: null },
+        subheading: { type: String as PropType<string | null>, default: null },
+        brandName: { type: String as PropType<string | null>, default: null },
+        brandHref: { type: String, default: '/' },
+        ...linkAsProp,
+    },
+
+    setup(props, { slots }) {
+        return () =>
+            h('div', { class: 'me-auth' }, [
+                h('div', { class: 'me-auth__panel' }, [
+                    slots.brand?.() ??
+                        h(MeBrand, {
+                            class: 'me-auth__brand',
+                            name: props.brandName,
+                            href: props.brandHref,
+                            as: props.as,
+                        }),
+
+                    h('div', [
+                        props.heading ? h('h1', { class: 'me-auth__heading' }, props.heading) : null,
+                        props.subheading ? h('p', { class: 'me-auth__subheading' }, props.subheading) : null,
+                    ]),
+
+                    // Where Blade reads session('status'), a Vue application
+                    // passes whatever its own flash mechanism produced.
+                    slots.status?.(),
+
+                    h(MeCard, null, { default: () => slots.default?.() }),
+
+                    slots.footer ? h('p', { class: 'me-auth__footer' }, slots.footer()) : null,
+                ]),
+            ])
+    },
+})
+
+/**
+ * Shared frame for the 4xx/5xx pages.
+ *
+ * Severity picks the role colour: 4xx reads as a warning — you asked for
+ * something that is not there — and 5xx as a danger, because we broke. It
+ * falls back to the status code, so a page only has to pass the number.
+ */
+export const MeErrorLayout = defineComponent({
+    name: 'MeErrorLayout',
+
+    props: {
+        status: { type: [Number, String] as PropType<number | string | null>, default: null },
+        title: { type: String as PropType<string | null>, default: null },
+        icon: { type: String as PropType<string | null>, default: null },
+        severity: { type: String as PropType<'info' | 'warning' | 'danger' | null>, default: null },
+        home: { type: Boolean, default: true },
+        homeHref: { type: String, default: '/' },
+        back: { type: Boolean, default: true },
+        ...linkAsProp,
+    },
+
+    setup(props, { slots }) {
+        return () => {
+            const code = Number(props.status)
+            const severity =
+                props.severity ??
+                (code >= 500 ? 'danger' : code >= 400 ? 'warning' : 'info')
+
+            return h('div', { class: ['me-error-page', `me-error-page--${severity}`] }, [
+                h('div', { class: 'me-error-page__panel' }, [
+                    props.icon
+                        ? h('span', { class: 'me-error-page__badge' }, [h(MeIcon, { name: props.icon as never })])
+                        : null,
+
+                    props.status !== null ? h('p', { class: 'me-error-page__status' }, String(props.status)) : null,
+                    props.title ? h('h1', { class: 'me-error-page__title' }, props.title) : null,
+
+                    h('p', { class: 'me-error-page__text' }, slots.default?.()),
+
+                    h('div', { class: 'me-error-page__actions' }, [
+                        props.back
+                            ? h(
+                                  MeButton,
+                                  {
+                                      variant: 'secondary',
+                                      icon: 'arrow-left',
+                                      onClick: () => window.history.back(),
+                                  },
+                                  () => t('errors.goBack'),
+                              )
+                            : null,
+
+                        props.home
+                            ? h(
+                                  MeButton,
+                                  { variant: 'primary', href: props.homeHref, as: props.as },
+                                  () => t('errors.backHome'),
+                              )
+                            : null,
+                    ]),
+                ]),
+            ])
+        }
+    },
+})
