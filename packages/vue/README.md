@@ -127,7 +127,7 @@ configureMessages({ 'table.search': 'Buscar', 'table.empty': 'Nenhum registro' }
 | **Display** | `MeButton` `MeBadge` `MeAlert` `MeCard` `MeAvatar` `MeIcon` `MeProgress` `MeProgressRing` `MeBrand` |
 | **Form** | `MeField` `MeInput` `MeTextarea` `MeSelect` `MeSelectField` `MeCheckbox` `MeRadio` `MeSwitch` `MeNumeric` `MeUpload` |
 | **Overlay** | `MeModal` `MeDropdown` `MeDropdownItem` `MeDropdownHeader` `MeDropdownDivider` `MeTooltip` `MeToasts` `useToasts` |
-| **Shell** | `MeAdminLayout` `MeNavSection` `MeNavGroup` `MeNavItem` `MeNavSubitem` `MeUserMenu` `MeThemeToggle` `MeThemeMenu` |
+| **Shell** | `MeAdminLayout` `MeAuthLayout` `MeErrorLayout` `MeNavSection` `MeNavGroup` `MeNavItem` `MeNavSubitem` `MeUserMenu` `MeThemeToggle` `MeThemeMenu` |
 
 Every form control supports `v-model`. The ones that carry real behaviour —
 the custom select, the numeric input, the upload dropzone, dropdowns, modals,
@@ -158,12 +158,20 @@ break everyone on another.
 arrives with its dropdowns, tooltips and modals wired. You should not need to
 call `initMyEyes()` yourself.
 
-Three things differ from Blade on purpose:
+Every Blade component has an equivalent here, and a test in the Composer
+package counts the two sets so that stays true. The two exceptions are
+deliberate: `x-me::layouts.head` emits the document head, and
+`x-me::translations` emits a script tag — a Vue application owns the first and
+calls `configureMessages()` for the second.
+
+Four things differ from Blade on purpose:
 
 - `MeAdminLayout` renders body content, not a document — your application owns
   `<html>` and `<head>`
 - `MeNavItem` takes `active` explicitly instead of comparing URLs
 - `MeModal` emits `confirm` instead of submitting a form
+- `MeAdminLayout`, `MeAuthLayout` and `MeErrorLayout` render body content, not
+  a document
 
 ```vue
 <MeAdminLayout heading="Users">
@@ -193,6 +201,22 @@ toasts.success('Saved')
 ```
 
 Place `<MeToasts />` once in the layout for them to appear in.
+
+## Pagination as links
+
+`MePagination` renders buttons: its items fetch a page rather than navigating.
+When the pages do have addresses — the table already mirrors its state into the
+URL — pass `hrefFor` and they become real links, so middle-click and "open in
+new tab" work:
+
+```vue
+<MeTable endpoint="/users/table" />
+<!-- or, driving pagination yourself -->
+<MePagination :pagination="pagination" :href-for="(page) => `/users?page=${page}`" @navigate="go" />
+```
+
+A plain click still fetches without reloading; a modified click is left to the
+browser.
 
 ## Not included
 

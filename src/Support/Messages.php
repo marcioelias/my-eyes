@@ -92,6 +92,8 @@ final class Messages
             'layout.system' => __('my-eyes::ui.theme.system'),
             'layout.light' => __('my-eyes::ui.theme.light'),
             'layout.dark' => __('my-eyes::ui.theme.dark'),
+            'errors.goBack' => __('my-eyes::ui.errors.go_back'),
+            'errors.backHome' => __('my-eyes::ui.errors.back_home'),
         ];
     }
 }

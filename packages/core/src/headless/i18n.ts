@@ -64,6 +64,8 @@ export type MessageKey =
     | 'layout.system'
     | 'layout.light'
     | 'layout.dark'
+    | 'errors.goBack'
+    | 'errors.backHome'
 
 export type Messages = Record<MessageKey, string>
 
@@ -121,6 +123,8 @@ const defaults: Messages = {
     'layout.system': 'System',
     'layout.light': 'Light',
     'layout.dark': 'Dark',
+    'errors.goBack': 'Go back',
+    'errors.backHome': 'Back to home',
 }
 
 let messages: Messages = { ...defaults }

@@ -389,7 +389,13 @@ Theme: three modes — `system` (default), `light`, `dark`. Any element with
 
 ## 8. `@my-eyes/vue`
 
-Every Blade component has a Vue equivalent. Exports:
+Every Blade component has a Vue equivalent — a Pest test counts the two sets,
+so this claim cannot drift. Two Blade components have no Vue counterpart on
+purpose: `x-me::layouts.head` emits `<html>`/`<head>` for a server-rendered
+page, and `x-me::translations` emits the locale's strings as a script tag, which
+Vue replaces with `configureMessages()`.
+
+Exports:
 
 | Group | Exports |
 |---|---|
@@ -397,7 +403,7 @@ Every Blade component has a Vue equivalent. Exports:
 | Display | `MeButton` `MeBadge` `MeAlert` `MeCard` `MeAvatar` `MeIcon` `MeProgress` `MeProgressRing` `MeBrand` |
 | Form | `MeField` `MeInput` `MeTextarea` `MeSelect` `MeSelectField` `MeCheckbox` `MeRadio` `MeSwitch` `MeNumeric` `MeUpload` |
 | Overlay | `MeModal` `MeDropdown` `MeDropdownItem` `MeDropdownHeader` `MeDropdownDivider` `MeTooltip` `MeToasts` `useToasts` |
-| Shell | `MeAdminLayout` `MeNavSection` `MeNavGroup` `MeNavItem` `MeNavSubitem` `MeUserMenu` `MeThemeToggle` `MeThemeMenu` |
+| Shell | `MeAdminLayout` `MeAuthLayout` `MeErrorLayout` `MeNavSection` `MeNavGroup` `MeNavItem` `MeNavSubitem` `MeUserMenu` `MeThemeToggle` `MeThemeMenu` |
 | Helper | `initials(name)` |
 
 Props mirror the Blade component of the same name (section 3), with these
@@ -407,9 +413,11 @@ exceptions:
   in place of `value`/`checked`. `MeCheckbox` binds a boolean, or an array to
   act as one of a group.
 - `MeButton` takes `iconOnly` for the icon-only shape; `icon` is the icon name.
-- `MeAdminLayout` renders **body content, not a document**: no `<html>`, no
-  `<head>`. Slots: `nav`, `topbar`, `user`, `actions`, `sidebarFooter`,
-  `brand`, `footer`, default.
+- `MeAdminLayout`, `MeAuthLayout` and `MeErrorLayout` render **body content,
+  not a document**: no `<html>`, no `<head>`. `MeAdminLayout` slots: `nav`,
+  `topbar`, `user`, `actions`, `sidebarFooter`, `brand`, `footer`, default.
+  `MeAuthLayout`: `brand`, `status`, `footer`, default. `MeErrorLayout` takes
+  `status`, `title`, `icon`, `severity`, `home`, `homeHref`, `back`.
 - `MeNavItem` requires `active` explicitly; it does not compare URLs.
 - `MeModal` emits `confirm` and has no `action`/`method`. There is no form, no
   CSRF token and no method spoofing.
@@ -431,9 +439,11 @@ Pass Inertia's `Link` or vue-router's `RouterLink`. The package never detects
 the router itself — do not suggest that it does, and do not write a click
 interceptor to work around a plain anchor.
 
-`MePagination` renders **buttons, not links**, and takes no `as`. Its items
-fetch a page rather than navigating; a link that does not navigate misleads
-assistive technology.
+`MePagination` renders **buttons by default** — its items fetch a page rather
+than navigating, and a link that does not navigate misleads assistive
+technology. Pass `hrefFor: (page) => string` to make them real links; a plain
+click still fetches, a modified click is left to the browser, and a disabled
+edge stays a button rather than becoming a dead link.
 
 ### Opening a modal
 

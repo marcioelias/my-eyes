@@ -3,7 +3,10 @@ import { describe, expect, it } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
 import {
     MeAlert,
+    MeAuthLayout,
     MeAvatar,
+    MeErrorLayout,
+    MePagination,
     MeBadge,
     MeButton,
     MeCard,
@@ -475,5 +478,94 @@ describe('MeAlert dismissal', () => {
 
         await wrapper.setProps({ visible: false })
         expect(wrapper.find('.me-alert').exists()).toBe(false)
+    })
+})
+
+describe('layouts', () => {
+    it('MeAuthLayout renders body content, not a document', () => {
+        const wrapper = mount(MeAuthLayout, {
+            props: { heading: 'Sign in', subheading: 'Welcome back' },
+            slots: { default: () => 'form', footer: () => 'No account?' },
+        })
+
+        expect(wrapper.find('html').exists()).toBe(false)
+        expect(wrapper.classes()).toContain('me-auth')
+        expect(wrapper.find('.me-auth__heading').text()).toBe('Sign in')
+        expect(wrapper.find('.me-auth__subheading').text()).toBe('Welcome back')
+        expect(wrapper.find('.me-card__body').text()).toBe('form')
+        expect(wrapper.find('.me-auth__footer').text()).toBe('No account?')
+    })
+
+    it('MeErrorLayout derives severity from the status code', () => {
+        expect(mount(MeErrorLayout, { props: { status: 404 } }).classes()).toContain('me-error-page--warning')
+        expect(mount(MeErrorLayout, { props: { status: 500 } }).classes()).toContain('me-error-page--danger')
+        expect(mount(MeErrorLayout, { props: { status: 200 } }).classes()).toContain('me-error-page--info')
+    })
+
+    it('MeErrorLayout lets severity be overridden', () => {
+        const wrapper = mount(MeErrorLayout, { props: { status: 404, severity: 'danger', title: 'Gone' } })
+
+        expect(wrapper.classes()).toContain('me-error-page--danger')
+        expect(wrapper.find('.me-error-page__status').text()).toBe('404')
+        expect(wrapper.find('.me-error-page__title').text()).toBe('Gone')
+    })
+
+    it('MeErrorLayout drops the actions it was told to hide', () => {
+        const both = mount(MeErrorLayout, { props: { status: 404 } })
+        expect(both.findAll('.me-error-page__actions .me-btn')).toHaveLength(2)
+
+        const neither = mount(MeErrorLayout, { props: { status: 404, home: false, back: false } })
+        expect(neither.findAll('.me-error-page__actions .me-btn')).toHaveLength(0)
+    })
+})
+
+describe('MePagination links', () => {
+    const pagination = { page: 2, perPage: 25, total: 100, lastPage: 4, from: 26, to: 50 }
+
+    it('renders buttons when no address is given', () => {
+        const wrapper = mount(MePagination, { props: { pagination } })
+
+        expect(wrapper.findAll('a')).toHaveLength(0)
+        expect(wrapper.findAll('button').length).toBeGreaterThan(0)
+    })
+
+    it('renders links when the consumer can name an address', () => {
+        const wrapper = mount(MePagination, {
+            props: { pagination, hrefFor: (page: number) => `/users?page=${page}` },
+        })
+
+        const links = wrapper.findAll('a')
+        expect(links.length).toBeGreaterThan(0)
+        expect(links.some((link) => link.attributes('href') === '/users?page=4')).toBe(true)
+    })
+
+    it('fetches on a plain click instead of navigating', async () => {
+        const wrapper = mount(MePagination, {
+            props: { pagination, hrefFor: (page: number) => `/users?page=${page}` },
+        })
+
+        await wrapper.findAll('.me-pagination__item--number')[0]?.trigger('click', { button: 0 })
+
+        expect(wrapper.emitted('navigate')?.[0]).toEqual([1])
+    })
+
+    it('leaves a modified click to the browser', async () => {
+        const wrapper = mount(MePagination, {
+            props: { pagination, hrefFor: (page: number) => `/users?page=${page}` },
+        })
+
+        await wrapper.findAll('.me-pagination__item--number')[0]?.trigger('click', { button: 0, metaKey: true })
+
+        expect(wrapper.emitted('navigate')).toBeUndefined()
+    })
+
+    it('keeps a disabled edge as a button, never a dead link', () => {
+        const wrapper = mount(MePagination, {
+            props: { pagination: { ...pagination, page: 1 }, hrefFor: (page: number) => `/users?page=${page}` },
+        })
+
+        const previous = wrapper.findAll('.me-pagination__item')[0]
+        expect(previous?.element.tagName).toBe('BUTTON')
+        expect(previous?.attributes('disabled')).toBeDefined()
     })
 })
