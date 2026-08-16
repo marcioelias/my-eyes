@@ -1,6 +1,6 @@
 {
   "name": "@my-eyes/vue",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "my-eyes components for Vue 3 — the same design system and the same server-driven table",
   "type": "module",
   "files": [
@@ -21,11 +21,11 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {
-    "@my-eyes/core": "^0.3.0",
+    "@my-eyes/core": "^0.3.1",
     "vue": "^3.5.0"
   },
   "devDependencies": {
-    "@my-eyes/core": "^0.3.0",
+    "@my-eyes/core": "^0.3.1",
     "typescript": "^5.7.0",
     "vue": "^3.5.0"
   },
