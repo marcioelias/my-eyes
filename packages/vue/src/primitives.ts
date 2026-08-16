@@ -1,4 +1,4 @@
-import { icons, type IconName } from '@my-eyes/core'
+import { hasIcon, icon, type IconName } from '@my-eyes/core'
 import { computed, defineComponent, h, type Component, type PropType, type VNode } from 'vue'
 
 /**
@@ -49,29 +49,82 @@ export type Tone = 'primary' | 'success' | 'danger' | 'warning' | 'info'
 
 export type Size = 'xs' | 'sm' | 'md' | 'lg'
 
+/*
+ * The wrapper every icon is drawn into.
+ *
+ * Kept in one place so an icon supplied through the slot inherits the same
+ * grid, weight and terminals as a bundled one. Hand-copying these into an
+ * application is what makes a custom icon drift the day the design system
+ * changes them.
+ */
+const SVG_ATTRS = {
+    xmlns: 'http://www.w3.org/2000/svg',
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    'aria-hidden': 'true',
+} as const
+
+/*
+ * Warned names, so a name in a render loop reports once rather than on every
+ * frame. Warning rather than throwing: an unknown icon is a mistake, but not
+ * one worth taking a page down for.
+ */
+const warned = new Set<string>()
+
 export const MeIcon = defineComponent({
     name: 'MeIcon',
 
     props: {
-        name: { type: String as PropType<IconName>, required: true },
+        /**
+         * A bundled name, or one added through `registerIcons()`.
+         *
+         * Optional, because the default slot is the escape hatch for an icon
+         * that is not in the set.
+         */
+        name: { type: String as PropType<IconName>, default: '' },
         stroke: { type: [Number, String], default: 1.75 },
     },
 
-    setup(props, { attrs }) {
-        return () =>
-            h('svg', {
+    setup(props, { attrs, slots }) {
+        return () => {
+            /*
+             * The slot wins, and suppresses the lookup entirely: pass the inner
+             * geometry of a 24x24 drawing and it comes out wearing the same
+             * wrapper as every other icon.
+             *
+             *   <MeIcon><path d="M4 20h16" /></MeIcon>
+             */
+            if (slots.default) {
+                return h('svg', { ...attrs, ...SVG_ATTRS, 'stroke-width': props.stroke }, slots.default())
+            }
+
+            const geometry = hasIcon(props.name) ? icon(props.name) : ''
+
+            /*
+             * A typo used to render an empty <svg> — an invisible button, not
+             * an error. TypeScript catches a literal, but the name is often
+             * computed, and the registry is open by design so the type cannot
+             * be closed either. This is the only guard left.
+             */
+            if (geometry === '' && !warned.has(props.name)) {
+                warned.add(props.name)
+                console.warn(
+                    `[my-eyes] Unknown icon "${props.name}". Register it with registerIcons(), `
+                    + 'or pass the geometry as the default slot.',
+                )
+            }
+
+            return h('svg', {
                 ...attrs,
-                xmlns: 'http://www.w3.org/2000/svg',
-                viewBox: '0 0 24 24',
-                fill: 'none',
-                stroke: 'currentColor',
+                ...SVG_ATTRS,
                 'stroke-width': props.stroke,
-                'stroke-linecap': 'round',
-                'stroke-linejoin': 'round',
-                'aria-hidden': 'true',
-                // The icon set is a constant in this package, never user input.
-                innerHTML: icons[props.name] ?? '',
+                // Registry content, never user input.
+                innerHTML: geometry,
             })
+        }
     },
 })
 

@@ -6,6 +6,35 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- 96 more icons — 128 in all — drawn for CRUD, ERP and CRM work: files,
+  tables, commerce, people, charts, notifications and system. One family:
+  24×24 grid, 1.75 stroke, round terminals.
+- The set now has one source, `resources/icons/*.svg`, generated into PHP and
+  TypeScript by `bin/build-icons.php`. It used to be written out twice with a
+  test holding the two in step; the generator removes the class of bug that
+  test existed to catch, and adding an icon is now dropping in an SVG.
+- `registerIcons()` in `@my-eyes/core` and an `icons` key in
+  `config/my-eyes.php`. An icon set is a styling decision, and this package's
+  rule is that those belong to the application — so bring Font Awesome, or any
+  other set, without the package depending on one.
+- `bin/render-icons.php` renders a contact sheet at reading size and at 16px,
+  and `docs/icon-authoring.md` documents the loop. Detail that survives one
+  size and vanishes in the other is the most common mistake in an icon set.
+- The showcase has an icon section.
+
+### Fixed
+
+- `MeIcon` rendered an empty `<svg>` for a name it did not know — a typo became
+  an invisible button rather than an error. TypeScript cannot catch it, because
+  the registry is open by design and the name is often computed, so it now
+  warns once per unknown name. Blade throws while `app.debug` is on.
+- Neither renderer had an escape hatch: an icon outside the set meant copying
+  the `<svg>` wrapper by hand, and that copy stopped matching the day the
+  design system changed it. Both now take the geometry as a slot, wrapper
+  included.
+
 ## [0.3.2] - 2026-08-15
 
 ### Added

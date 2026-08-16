@@ -121,22 +121,18 @@ it('keeps every javascript message key in sync with the core dictionary', functi
     expect($phpKeys)->toBe($coreKeys);
 });
 
-it('keeps the icon set in sync between Blade and the core dictionary', function () {
-    // The two sets are written out separately — one in PHP for server
-    // rendering, one in TypeScript for the components that draw icons in the
-    // browser. A name in one and not the other is a blank icon at runtime.
-    $blade = file_get_contents(__DIR__.'/../resources/views/components/icon.blade.php');
-    $core = file_get_contents(__DIR__.'/../packages/core/src/icons.ts');
+it('keeps the generated icon files in step with resources/icons', function () {
+    // The set is generated into PHP and TypeScript from one directory of SVGs.
+    // Editing a generated file by hand, or adding an SVG without running the
+    // generator, is what this catches.
+    $process = proc_open(
+        [PHP_BINARY, __DIR__.'/../bin/build-icons.php', '--check'],
+        [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+        $pipes
+    );
 
-    preg_match_all("/^        '([a-z-]+)' =>/m", (string) $blade, $bladeMatches);
-    preg_match_all("/^    '([a-z-]+)':/m", (string) $core, $coreMatches);
+    $output = stream_get_contents($pipes[1]).stream_get_contents($pipes[2]);
+    array_map('fclose', $pipes);
 
-    $bladeIcons = $bladeMatches[1];
-    $coreIcons = $coreMatches[1];
-
-    sort($bladeIcons);
-    sort($coreIcons);
-
-    expect($coreIcons)->toBe($bladeIcons)
-        ->and($bladeIcons)->not->toBeEmpty();
+    expect(proc_close($process))->toBe(0, $output);
 });

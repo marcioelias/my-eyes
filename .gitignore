@@ -7,3 +7,6 @@ playground/index.html
 playground/fragment.html
 .DS_Store
 
+
+# Icon contact sheets, rendered on demand
+/build/

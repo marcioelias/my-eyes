@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\View\ViewException;
 
 it('renders a button with variant and size classes', function () {
     $html = Blade::render('<x-me::button variant="primary" size="lg">Save</x-me::button>');
@@ -186,4 +187,40 @@ it('renders an icon from the bundled set', function () {
     $html = Blade::render('<x-me::icon name="chevron-down" />');
 
     expect($html)->toContain('<svg')->toContain('m6 9 6 6 6-6');
+});
+
+it('renders slot geometry in the standard icon wrapper', function () {
+    $html = Blade::render('<x-me::icon><path d="M4 20h16" /></x-me::icon>');
+
+    expect($html)
+        ->toContain('viewBox="0 0 24 24"')
+        ->toContain('stroke-linecap="round"')
+        ->toContain('M4 20h16');
+});
+
+it('lets a slotted icon override the looked-up name', function () {
+    $html = Blade::render('<x-me::icon name="check"><path d="M1 1h1" /></x-me::icon>');
+
+    expect($html)->toContain('M1 1h1')->not->toContain('M20 6 9 17l-5-5');
+});
+
+it('refuses an unknown icon name while debugging', function () {
+    config()->set('app.debug', true);
+
+    // Blade wraps whatever a view throws, so the type is not the assertion —
+    // the message reaching the developer is.
+    Blade::render('<x-me::icon name="definitely-not-an-icon" />');
+})->throws(ViewException::class, 'Unknown my-eyes icon [definitely-not-an-icon]');
+
+it('degrades quietly on an unknown icon in production', function () {
+    config()->set('app.debug', false);
+
+    // A missing glyph must not take a page down.
+    expect(Blade::render('<x-me::icon name="definitely-not-an-icon" />'))->toContain('<svg');
+});
+
+it('accepts an icon registered through config', function () {
+    config()->set('my-eyes.icons', ['invoice' => '<path d="M6 3h12v18" />']);
+
+    expect(Blade::render('<x-me::icon name="invoice" />'))->toContain('M6 3h12v18');
 });

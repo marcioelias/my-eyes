@@ -123,13 +123,47 @@ which are merged onto its root element.
 
 ### Icon names
 
-`alert-circle` `alert-triangle` `arrow-left` `check` `check-circle`
-`chevron-down` `chevron-right` `clock` `eye` `eye-off` `file-question` `home`
-`info` `layout-dashboard` `lock` `log-out` `mail` `menu` `minus` `monitor`
-`moon` `panel-left` `plus` `search` `server-crash` `settings` `shield-off`
-`sun` `upload-cloud` `user` `users` `x`
+128 icons, one family: 24×24 grid, 1.75 stroke, round terminals.
 
-Any other icon goes in as a slot. There is no icon-package integration.
+`activity` `alert-circle` `alert-triangle` `archive` `arrow-down`
+`arrow-left` `arrow-right` `arrow-up` `at-sign` `banknote` `bar-chart`
+`barcode` `bell` `bell-off` `bookmark` `briefcase` `building`
+`calculator` `calendar` `calendar-check` `check` `check-circle`
+`chevron-down` `chevron-left` `chevron-right` `chevron-up` `circle-x`
+`clipboard` `clock` `clock-history` `cloud` `collapse` `columns`
+`contact` `copy` `credit-card` `database` `download` `expand`
+`external-link` `eye` `eye-off` `file` `file-check` `file-plus`
+`file-question` `file-text` `file-x` `filter` `flag` `folder-open`
+`folder-plus` `gauge` `grid` `headset` `help-circle` `home` `hourglass`
+`id-card` `info` `invoice` `key` `layout-dashboard` `line-chart` `link`
+`list` `lock` `log-in` `log-out` `mail` `maximize` `menu`
+`message-square` `minimize` `minus` `monitor` `moon` `more-horizontal`
+`more-vertical` `package` `panel-left` `paperclip` `pencil` `percent`
+`phone` `pie-chart` `plus` `power` `printer` `receipt` `redo` `refresh`
+`save` `search` `send` `server` `server-crash` `settings` `share`
+`shield` `shield-off` `shopping-cart` `sort-asc` `sort-desc` `star` `sun`
+`table` `tag` `target` `terminal` `thumbs-down` `thumbs-up` `trash`
+`trending-down` `trending-up` `truck` `undo` `unlock` `upload`
+`upload-cloud` `user` `user-check` `user-group` `user-plus` `user-x`
+`users` `wallet` `x`
+
+Add or override one through the `icons` key in `config/my-eyes.php` (Blade) or
+`registerIcons()` (JavaScript). For a one-off drawing, pass the geometry as the
+default slot and it inherits the standard wrapper:
+
+```blade
+<x-me::icon><path d="M4 20h16" /></x-me::icon>
+```
+
+```vue
+<MeIcon><path d="M4 20h16" /></MeIcon>
+```
+
+Never hand-copy the `<svg>` wrapper into an application — that copy stops
+matching the day the design system changes it.
+
+An unknown name throws while `app.debug` is on (Blade) and warns once to the
+console (Vue). It never renders a silently empty icon.
 
 ---
 

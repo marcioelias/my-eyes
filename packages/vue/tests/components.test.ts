@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
 import {
     MeAlert,
@@ -567,5 +567,56 @@ describe('MePagination links', () => {
         const previous = wrapper.findAll('.me-pagination__item')[0]
         expect(previous?.element.tagName).toBe('BUTTON')
         expect(previous?.attributes('disabled')).toBeDefined()
+    })
+})
+
+describe('MeIcon escape hatch and unknown names', () => {
+    it('renders slot geometry in the standard wrapper', () => {
+        const wrapper = mount(MeIcon, { slots: { default: () => h('path', { d: 'M4 20h16' }) } })
+
+        expect(wrapper.element.tagName).toBe('svg')
+        expect(wrapper.attributes('viewBox')).toBe('0 0 24 24')
+        expect(wrapper.attributes('stroke-linecap')).toBe('round')
+        expect(wrapper.attributes('stroke-width')).toBe('1.75')
+        expect(wrapper.find('path').attributes('d')).toBe('M4 20h16')
+    })
+
+    it('lets the slot override a name rather than being wiped by innerHTML', () => {
+        const wrapper = mount(MeIcon, {
+            props: { name: 'check' },
+            slots: { default: () => h('path', { d: 'M1 1h1' }) },
+        })
+
+        expect(wrapper.findAll('path')).toHaveLength(1)
+        expect(wrapper.find('path').attributes('d')).toBe('M1 1h1')
+    })
+
+    it('honours a custom stroke on a slotted icon', () => {
+        const wrapper = mount(MeIcon, {
+            props: { stroke: 2.5 },
+            slots: { default: () => h('path', { d: 'M4 20h16' }) },
+        })
+
+        expect(wrapper.attributes('stroke-width')).toBe('2.5')
+    })
+
+    it('warns once for an unknown name instead of rendering an empty svg silently', () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+        try {
+            // The registry is open by design, so the type cannot catch this —
+            // and a computed name would defeat it anyway.
+            mount(MeIcon, { props: { name: 'definitely-not-an-icon' } })
+            mount(MeIcon, { props: { name: 'definitely-not-an-icon' } })
+
+            expect(warn).toHaveBeenCalledTimes(1)
+            expect(warn.mock.calls[0]?.[0]).toContain('definitely-not-an-icon')
+        } finally {
+            warn.mockRestore()
+        }
+    })
+
+    it('still draws a known icon', () => {
+        expect(mount(MeIcon, { props: { name: 'check' } }).find('path').exists()).toBe(true)
     })
 })

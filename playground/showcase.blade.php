@@ -179,6 +179,27 @@
             </div>
         </x-me::card>
 
+        <x-me::card
+            title="Icons"
+            description="One family: 24×24 grid, 1.75 stroke, round terminals. Drawn for CRUD, ERP and CRM work — hover any of them for the name. Add or override one through the “icons” key in config, or pass a one-off drawing as the slot."
+        >
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(3.25rem,1fr));gap:0.375rem">
+                @foreach (array_keys(\MyEyes\Support\Icons::PATHS) as $icon)
+                    <span
+                        style="display:flex;align-items:center;justify-content:center;aspect-ratio:1;border-radius:0.5rem;border:1px solid var(--color-line);color:var(--color-content-muted)"
+                        data-me-tooltip="{{ $icon }}"
+                    >
+                        <x-me::icon :name="$icon" />
+                    </span>
+                @endforeach
+            </div>
+
+            <p class="me-hint" style="margin-top:0.75rem">
+                {{ count(\MyEyes\Support\Icons::PATHS) }} icons. A name that does not exist raises an
+                exception while debugging rather than rendering an empty square.
+            </p>
+        </x-me::card>
+
         <x-me::card title="Progress" description="Linear and circular, determinate and indeterminate.">
             <div class="me-stack">
                 <x-me::progress :value="72" variant="primary" label="Importing customers" show-value />

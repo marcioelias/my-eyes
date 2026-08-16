@@ -48,6 +48,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Icons
+    |--------------------------------------------------------------------------
+    |
+    | Adds to the bundled set, or overrides one of it. Each entry is the inner
+    | geometry of a 24x24 SVG — the <svg> wrapper is the component's, so stroke
+    | width and colour stay under the design system's control.
+    |
+    |     'invoice' => '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/>',
+    |
+    */
+
+    'icons' => [],
+
+    /*
+    |--------------------------------------------------------------------------
     | Layout
     |--------------------------------------------------------------------------
     |
