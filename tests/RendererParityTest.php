@@ -102,9 +102,9 @@ function bladePages(): array
  *
  * @return array<string, array<int, string>>
  */
-function vueExports(): array
+function packageExports(string $package): array
 {
-    $source = (string) file_get_contents(__DIR__.'/../packages/vue/src/index.ts');
+    $source = (string) file_get_contents(__DIR__."/../packages/{$package}/src/index.ts");
 
     preg_match_all('/export\s*\{(.+?)\}\s*from\s*\'\.\/([\w.-]+)\.js\'/s', $source, $matches, PREG_SET_ORDER);
 
@@ -113,8 +113,15 @@ function vueExports(): array
     foreach ($matches as $match) {
         preg_match_all('/\b(Me[A-Za-z]+)\b/', $match[1], $names);
 
+        // A prop type is not a component. React exports both; Vue exports only
+        // the components, so filtering here keeps one rule for both packages.
+        $components = array_values(array_filter(
+            $names[1],
+            static fn (string $name): bool => ! str_ends_with($name, 'Props'),
+        ));
+
         $module = $match[2];
-        $modules[$module] = array_values(array_unique(array_merge($modules[$module] ?? [], $names[1])));
+        $modules[$module] = array_values(array_unique(array_merge($modules[$module] ?? [], $components)));
     }
 
     return $modules;
@@ -123,11 +130,11 @@ function vueExports(): array
 /**
  * @return array<int, string>
  */
-function vueComponents(): array
+function packageComponents(string $package): array
 {
     $names = [];
 
-    foreach (vueExports() as $module => $exports) {
+    foreach (packageExports($package) as $module => $exports) {
         if ($module !== 'screens') {
             $names = array_merge($names, $exports);
         }
@@ -142,13 +149,16 @@ function vueComponents(): array
 /**
  * @return array<int, string>
  */
-function vueScreens(): array
+function packageScreens(string $package): array
 {
-    $names = vueExports()['screens'] ?? [];
+    $names = packageExports($package)['screens'] ?? [];
     sort($names);
 
     return $names;
 }
+
+/** Every client renderer the package ships. Blade is what they are counted against. */
+const CLIENT_RENDERERS = ['vue', 'react'];
 
 /**
  * Blade names the file, Vue names the export. This maps one to the other for
@@ -170,7 +180,7 @@ function expectedVueName(string $blade): string
     return 'Me'.str($blade)->replace('/', '-')->studly()->toString();
 }
 
-it('exports a Vue component for every Blade component', function () {
+it('exports a component for every Blade component, in every renderer', function (string $package) {
     $missing = [];
 
     foreach (bladeComponents() as $blade) {
@@ -180,18 +190,25 @@ it('exports a Vue component for every Blade component', function () {
 
         $expected = expectedVueName($blade);
 
-        if (! in_array($expected, vueComponents(), true)) {
+        if (! in_array($expected, packageComponents($package), true)) {
             $missing[$blade] = $expected;
         }
     }
 
     expect($missing)->toBe([]);
-});
+})->with(CLIENT_RENDERERS);
 
-it('counts the two sets, so neither can quietly outgrow the other', function () {
+it('counts the sets, so none can quietly outgrow the others', function (string $package) {
     $blade = count(bladeComponents()) - count(NOT_APPLICABLE_TO_VUE);
 
-    expect(count(vueComponents()))->toBe($blade);
+    expect(count(packageComponents($package)))->toBe($blade);
+})->with(CLIENT_RENDERERS);
+
+it('keeps the client renderers identical to each other', function () {
+    // Blade is the reference, but a name that drifted in both directions at once
+    // would satisfy the counts above. This is the direct comparison.
+    expect(packageComponents('react'))->toBe(packageComponents('vue'));
+    expect(packageScreens('react'))->toBe(packageScreens('vue'));
 });
 
 it('keeps the not-applicable list honest', function () {
@@ -206,7 +223,7 @@ it('keeps the not-applicable list honest', function () {
     }
 });
 
-it('exports a Vue screen for every published Blade screen', function () {
+it('exports a screen for every published Blade screen, in every renderer', function (string $package) {
     $missing = [];
 
     foreach (bladePages() as $page) {
@@ -216,16 +233,16 @@ it('exports a Vue screen for every published Blade screen', function () {
 
         $expected = PAGE_TO_VUE_SCREEN[$page] ?? null;
 
-        if ($expected === null || ! in_array($expected, vueScreens(), true)) {
+        if ($expected === null || ! in_array($expected, packageScreens($package), true)) {
             $missing[$page] = $expected ?? '(unmapped)';
         }
     }
 
     expect($missing)->toBe([]);
-});
+})->with(CLIENT_RENDERERS);
 
-it('counts the screens too', function () {
+it('counts the screens too', function (string $package) {
     $pages = count(bladePages()) - count(PAGES_NOT_APPLICABLE_TO_VUE);
 
-    expect(count(vueScreens()))->toBe($pages);
-});
+    expect(count(packageScreens($package)))->toBe($pages);
+})->with(CLIENT_RENDERERS);

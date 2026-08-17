@@ -35,7 +35,7 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME#v}"
 
-          for PACKAGE in core vue; do
+          for PACKAGE in core vue react; do
             VERSION="$(node -p "require('./packages/$PACKAGE/package.json').version")"
 
             if [ "$TAG" != "$VERSION" ]; then
@@ -53,6 +53,12 @@ jobs:
       # failure behaviour instead — and the package most likely to be refused
       # is the one the token has never published before. Failing on it leaves
       # nothing released, rather than half a release that cannot be undone.
+      - name: Publish @my-eyes/react
+        run: npm publish --provenance --access public
+        working-directory: packages/react
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish @my-eyes/vue
         run: npm publish --provenance --access public
         working-directory: packages/vue

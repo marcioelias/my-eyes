@@ -4,11 +4,11 @@ A complete, self-contained description of the public surface of `my-eyes`.
 Everything here exists in the source. Anything not listed here **does not
 exist** — see "What does not exist" at the end before inventing an API.
 
-Packages: `marcioelias/my-eyes` (Composer) · `@my-eyes/core` and
-`@my-eyes/vue` (npm).
+Packages: `marcioelias/my-eyes` (Composer) · `@my-eyes/core`, `@my-eyes/vue`
+and `@my-eyes/react` (npm).
 
 Requirements: PHP 8.2+ (8.3+ on Laravel 13) · Laravel 12 or 13 · Tailwind CSS 4
-· Livewire 3 or 4 (optional) · Vue 3.5+ (optional).
+· Livewire 3 or 4 (optional) · Vue 3.5+ or React 19 (optional).
 
 ---
 
@@ -567,14 +567,62 @@ not `.vue` files — this is an authoring choice and does not affect consumers.
 
 ---
 
-## 9. Authentication screens
+## 9. `@my-eyes/react`
 
-Every screen exists twice: a Blade view published with `--tag=my-eyes-pages`
-and edited by the application, and a Vue export configured by props. Both
-render the same markup. The package still ships **no route and no controller**;
+Everything `@my-eyes/vue` exports, under the same names, for React 19. A test
+counts the two sets against each other, so this claim cannot drift.
+
+Three translations, and they are the only intended differences:
+
+| Vue | React |
+|---|---|
+| scoped slot | render prop — `renderCell` on `MeTable` |
+| named slot | node prop — `actions` `footer` `aside` `nav` `topbar` `user` `trigger` `status` `brand` `sidebarFooter` `empty` |
+| emit | callback prop — `onSubmit` `onDismiss` `onConfirm` `onPasskey` `onNavigate` `onApply` `onValueChange` `onOpenChange` `onVisibleChange` `onEnable` `onDisable` `onRegenerate` `onRegistered` `onRemove` `onResend` `onSignOut` `onResendVerification` |
+| `v-model` | `value` + `onValueChange(next)` |
+| composable | hook (`useTable`, `useTheme`, `useToasts`) |
+
+`onValueChange` receives the **parsed value, never the event**, which leaves the
+native `onChange` free to reach the DOM element. A screen's `onSubmit` receives
+the **payload**, not an event.
+
+```tsx
+<MeTable
+    endpoint="/users/table"
+    renderCell={{ status: (value) => <MeBadge variant="success">{String(value)}</MeBadge> }}
+/>
+
+<MeLoginScreen errors={errors} canRegister onSubmit={(payload) => router.post('/login', payload)} />
+```
+
+Other differences worth knowing:
+
+- `MeCheckbox`, `MeRadio` and `MeSwitch` take their own value as
+  `checkboxValue` / `radioValue` / `switchValue`, because `value` is the model.
+- `MeField` takes `htmlFor`, not `for`.
+- `MeInput`'s `prefix` and `suffix` accept a node as well as a string; a string
+  gets the addon wrapper, a node is trusted to carry its own.
+- `MeIcon` takes the geometry as `children`.
+- The table's search box keeps a local draft, so the debounce cannot swallow
+  keystrokes. Vue does not need this.
+- Every component that touches the DOM carries `'use client'`, and the package
+  works inside a React Server Components build. The table is not server-rendered.
+- Strict Mode is handled: the state machine is in core and is read through
+  `useSyncExternalStore`, so the double mount applies one result.
+
+Peer dependencies: `react` ^19 and `@my-eyes/core`. No runtime dependency.
+
+---
+
+## 10. Authentication screens
+
+Every screen exists three times: a Blade view published with
+`--tag=my-eyes-pages` and edited by the application, and a Vue and a React
+export configured by props. All three render the same markup, and the exports
+carry the same names. The package still ships **no route and no controller**;
 the screens target Fortify's conventional names and paths.
 
-| Screen | Blade view | Vue export |
+| Screen | Blade view | Vue and React export |
 |---|---|---|
 | Sign in (+ passkey) | `pages/auth/login` | `MeLoginScreen` |
 | Register | `pages/auth/register` | `MeRegisterScreen` |
@@ -659,7 +707,7 @@ works.
 
 ---
 
-## 10. Configuration
+## 11. Configuration
 
 `config/my-eyes.php`: `brand.name` `brand.logo` `defaults.size`
 `defaults.button_variant` `locale` `icons` (name => inner SVG geometry, adding
@@ -668,7 +716,7 @@ to or overriding the bundled set) `layout.footer` `layout.sidebar_collapsible`
 
 ---
 
-## 11. What does not exist
+## 12. What does not exist
 
 Do not generate any of the following — they are not part of this package:
 
@@ -680,9 +728,8 @@ Do not generate any of the following — they are not part of this package:
 - **`tailwind.config.js`.** Tailwind v4, CSS-first `@theme` only.
 - **A `MyEyes` facade**, service container bindings, or `MyEyes::` static
   helpers of any kind.
-- **React, Svelte or Angular packages.** React is specified
-  (`docs/features/react-package.md`) but not implemented.
-- **Vue components beyond the lists in sections 8 and 9.** They are complete;
+- **Svelte or Angular packages.** Blade, Livewire, Vue and React are all there is.
+- **Components beyond the lists in sections 8, 9 and 10.** They are complete;
   there is no `MeTabs`, `MeAccordion`, `MeDatePicker`, `MeCombobox`,
   `MeDrawer`, `MePopover`, `MeStepper`, `MeBreadcrumb`, `MeSkeleton` or
   `MeSpinner`.

@@ -13,6 +13,8 @@ and an admin shell that is genuinely usable on a phone.
 [![CI](https://github.com/marcioelias/my-eyes/actions/workflows/ci.yml/badge.svg)](https://github.com/marcioelias/my-eyes/actions/workflows/ci.yml)
 [![Packagist](https://img.shields.io/packagist/v/marcioelias/my-eyes.svg)](https://packagist.org/packages/marcioelias/my-eyes)
 [![npm](https://img.shields.io/npm/v/@my-eyes/core.svg)](https://www.npmjs.com/package/@my-eyes/core)
+[![npm vue](https://img.shields.io/npm/v/@my-eyes/vue.svg?label=vue)](https://www.npmjs.com/package/@my-eyes/vue)
+[![npm react](https://img.shields.io/npm/v/@my-eyes/react.svg?label=react)](https://www.npmjs.com/package/@my-eyes/react)
 [![PHP](https://img.shields.io/packagist/dependency-v/marcioelias/my-eyes/php.svg)](composer.json)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -62,6 +64,10 @@ change and a pile of utility classes you have to re-type on every project.
 ```bash
 composer require marcioelias/my-eyes
 npm install @my-eyes/core
+
+# plus one of these, on an Inertia or SPA frontend
+npm install @my-eyes/vue      # Vue 3
+npm install @my-eyes/react    # React 19
 ```
 
 `resources/css/app.css`:
@@ -361,6 +367,29 @@ serialising throws instead of quietly turning escaped output into raw output on
 the client. The contract is documented in
 [docs/policies/table-payload.md](docs/policies/table-payload.md).
 
+### React
+
+`@my-eyes/react` ships the same set again, for React 19 — same names, same
+classes, same payload. A test counts the React exports against the Vue ones, and
+compares the markup both tables produce for one fixture.
+See [packages/react/README.md](packages/react/README.md).
+
+```tsx
+<MeTable
+    endpoint="/users/table"
+    renderCell={{
+        status: (value) => (
+            <MeBadge variant={value === 'active' ? 'success' : 'danger'}>{String(value)}</MeBadge>
+        ),
+    }}
+/>
+```
+
+Three translations from Vue and nothing else: a scoped slot becomes a render prop
+(`renderCell`), a named slot becomes a node prop (`actions`, `footer`, `aside`),
+and an emit becomes a callback prop (`onSubmit`). Form controls are controlled
+through `value` and `onValueChange`.
+
 ## Advanced filters
 
 Field / operator / value rows, joined by one **and/or** conjunction chosen on
@@ -623,9 +652,10 @@ every push.
 
 ## Roadmap
 
-Blade + JS ✅ → Livewire ✅ → Vue ✅ → React. The point of keeping the design system
-in CSS and the behaviour in framework-free TypeScript is that each of those is a
-thin markup layer, not a rewrite.
+Blade + JS ✅ → Livewire ✅ → Vue ✅ → React ✅. All four renderers ship. The point of
+keeping the design system in CSS and the behaviour in framework-free TypeScript
+is that each of those is a thin markup layer, not a rewrite — and a test counts
+the component sets against each other so they cannot drift.
 
 The specification lives in [docs/](docs/) — the renderers are written there
 first, then built. [docs/llm-reference.md](docs/llm-reference.md) is the whole

@@ -6,6 +6,39 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-17
+
+### Added
+
+- **`@my-eyes/react`** — the fourth renderer, and the last one on the roadmap.
+  Every component `@my-eyes/vue` exports, under the same names: the primitives,
+  the form controls, the overlays, the admin shell, the server-driven table and
+  all twelve authentication screens. React 19, function components, no runtime
+  dependency of its own.
+- Three translations from the Vue package and nothing else: a scoped slot is a
+  render prop (`renderCell`), a named slot is a node prop (`actions`, `footer`,
+  `aside`), an emit is a callback prop (`onSubmit`), and `v-model` is `value`
+  plus `onValueChange`. `onValueChange` hands over the parsed value rather than
+  the event, so the native `onChange` still reaches the element.
+- `'use client'` on everything that touches the DOM, so the package can be
+  imported from a React Server Components build without breaking it.
+- React Strict Mode is handled rather than tolerated: the table's state machine
+  already lived in `@my-eyes/core`, and the hook reads it through
+  `useSyncExternalStore`, so the double mount applies exactly one result.
+- `RendererParityTest` now counts **three** client renderers against Blade, and
+  compares React's exports against Vue's directly — a name that drifted in both
+  at once would have satisfied the old counts.
+- The table payload fixture moved to `packages/core/tests/fixtures.ts` and is
+  shared: a new test renders the Vue and the React table from the same payload
+  and compares the markup they produce. Two copies of a fixture cannot prove
+  parity.
+
+### Changed
+
+- The Blade table's search box behaviour is unchanged, but React's keeps a local
+  draft. A controlled input fed from the payload would snap back between
+  keystrokes, because the commit is debounced.
+
 ## [0.5.0] - 2026-08-17
 
 ### Changed
@@ -199,7 +232,8 @@ All notable changes to this project are documented here. The format follows
   Composer refuses to install the earlier versions — supporting them would
   produce an unsolvable dependency set rather than a working install.
 
-[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/marcioelias/my-eyes/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/marcioelias/my-eyes/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/marcioelias/my-eyes/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/marcioelias/my-eyes/compare/v0.3.1...v0.3.2

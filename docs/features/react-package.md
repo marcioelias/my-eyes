@@ -1,6 +1,6 @@
 # React renderer
 
-Status: approved
+Status: implemented
 
 ## Purpose
 

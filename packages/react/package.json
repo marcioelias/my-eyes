@@ -1,0 +1,53 @@
+{
+  "name": "@my-eyes/react",
+  "version": "0.5.0",
+  "description": "my-eyes components for React 19 — the same design system, the same server-driven table and the same auth screens",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "@my-eyes/core": "^0.5.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@my-eyes/core": "^0.5.0",
+    "@types/react": "^19.2.0",
+    "react": "^19.2.0",
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "react",
+    "components",
+    "design-system",
+    "tailwind",
+    "laravel",
+    "data-table"
+  ],
+  "homepage": "https://github.com/marcioelias/my-eyes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcioelias/my-eyes.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/marcioelias/my-eyes/issues"
+  },
+  "license": "MIT",
+  "author": "Márcio Elias",
+  "sideEffects": false
+}

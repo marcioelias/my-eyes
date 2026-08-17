@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import { h } from 'vue'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MeTable } from '../src/MeTable.js'
+import { respondWith, settle, tablePayload } from '../../core/tests/fixtures.js'
 
 /**
  * The Vue table against real payloads.
@@ -11,31 +12,9 @@ import { MeTable } from '../src/MeTable.js'
  * @see docs/policies/table-payload.md
  */
 
-const payload = (overrides: Partial<TablePayload> = {}): TablePayload => ({
-    columns: [
-        { key: 'name', label: 'Name', align: 'start', sortable: true, searchable: true, filterable: false, html: false },
-        { key: 'status', label: 'Status', align: 'end', sortable: false, searchable: false, filterable: false, html: false },
-    ],
-    rows: [
-        { name: 'Ana Souza', status: 'active' },
-        { name: 'Bruno Lima', status: 'banned' },
-    ],
-    sort: { key: null, direction: 'asc' },
-    search: '',
-    filters: { conditions: [], conjunction: 'and' },
-    schema: [],
-    pagination: { page: 1, perPage: 25, total: 2, lastPage: 1, from: 1, to: 2 },
-    perPageOptions: [10, 25, 50],
-    ...overrides,
-})
+const payload = tablePayload
 
-const respond = (body: TablePayload): Response =>
-    ({ ok: true, status: 200, statusText: 'OK', json: async () => body }) as unknown as Response
-
-const settle = async (): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, 0))
-    await new Promise((resolve) => setTimeout(resolve, 0))
-}
+const respond = respondWith
 
 const fetcherFor = (body: TablePayload | (() => TablePayload)) =>
     vi.fn(async () => respond(typeof body === 'function' ? body() : body))
