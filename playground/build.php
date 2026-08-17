@@ -137,17 +137,38 @@ foreach (['login', 'register', 'password.request', 'password.email', 'password.s
     Route::get('/'.str_replace('.', '/', $routeName), fn () => '')->name($routeName);
 }
 
-$bodyOf = static function (string $html): string {
+$bodyOf = static function (string $html, string $prefix): string {
     preg_match('/<body[^>]*>(.*)<\/body>/s', $html, $matches);
 
-    return trim($matches[1] ?? '');
+    $body = trim($matches[1] ?? '');
+
+    /*
+     * Two things are right on a real screen and wrong in an embedded preview,
+     * and both are fixed here rather than in the views — the published pages
+     * must keep them.
+     *
+     * autofocus: the browser honours it on load and scrolls the element into
+     * view. These previews sit near the end of a long document, so a login
+     * field claiming focus opened the showcase at the bottom of the page.
+     *
+     * Duplicated ids: three previews each render a field called "email", and
+     * an id has to be unique per document or every label points at the first
+     * one.
+     */
+    $body = (string) preg_replace('/\s+autofocus(="autofocus")?/', '', $body);
+
+    return (string) preg_replace(
+        '/\b(id|for|form|aria-describedby)="([^"]+)"/',
+        '$1="'.$prefix.'-$2"',
+        $body,
+    );
 };
 
 $previews = [
-    'login' => $bodyOf(view('my-eyes::pages.auth.login')->render()),
-    'register' => $bodyOf(view('my-eyes::pages.auth.register')->render()),
-    'forgot' => $bodyOf(view('my-eyes::pages.auth.forgot-password')->render()),
-    'error' => $bodyOf(view('my-eyes::errors.404')->render()),
+    'login' => $bodyOf(view('my-eyes::pages.auth.login')->render(), 'login'),
+    'register' => $bodyOf(view('my-eyes::pages.auth.register')->render(), 'register'),
+    'forgot' => $bodyOf(view('my-eyes::pages.auth.forgot-password')->render(), 'forgot'),
+    'error' => $bodyOf(view('my-eyes::errors.404')->render(), 'error'),
 ];
 
 $html = Blade::render(file_get_contents($root.'/playground/showcase.blade.php'), [
