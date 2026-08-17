@@ -542,7 +542,8 @@ not `.vue` files — this is an authoring choice and does not affect consumers.
 ## 9. Configuration
 
 `config/my-eyes.php`: `brand.name` `brand.logo` `defaults.size`
-`defaults.button_variant` `locale` `layout.footer` `layout.sidebar_collapsible`
+`defaults.button_variant` `locale` `icons` (name => inner SVG geometry, adding
+to or overriding the bundled set) `layout.footer` `layout.sidebar_collapsible`
 `vite` (array of entrypoints).
 
 ---
