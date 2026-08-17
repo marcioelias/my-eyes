@@ -267,29 +267,202 @@
         }
     }
 
-    /* Centred layout for auth screens — login, register, reset. */
+    /*
+     * Auth screens — login, register, reset.
+     *
+     * Two halves on a wide screen: the form on one side, a visual on the
+     * other. One column below 64rem, where a decorative half would only push
+     * the form off the fold — and because the aside is display:none there, a
+     * phone never downloads the image at all.
+     *
+     * The form column is wide on purpose. The old single centred card put a
+     * 25rem column in the middle of an empty viewport, which reads as cramped
+     * however much padding it carries: the space was on the outside, where it
+     * did nothing.
+     */
     .me-auth {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
         min-height: 100dvh;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem 1rem;
         background-color: var(--color-surface);
+    }
+
+    .me-auth__main {
+        display: grid;
+        place-items: center;
+        padding: 2.5rem 1.25rem;
     }
 
     .me-auth__panel {
         width: 100%;
-        max-width: 25rem;
+        max-width: 26rem;
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 1.75rem;
     }
 
+    /*
+     * The form is first in the DOM and placed by CSS, so a keyboard or a
+     * screen reader reaches the fields before the decoration regardless of
+     * which side it sits on.
+     */
+    .me-auth__aside {
+        display: none;
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+        color: var(--color-secondary-50);
+
+        /*
+         * With no image, the panel is the visual: three colour pools over deep
+         * slate. It uses the role tokens, so rebranding moves it too.
+         */
+        background:
+            radial-gradient(
+                120% 120% at 12% 18%,
+                color-mix(in oklch, var(--color-primary-400) 60%, transparent),
+                transparent 58%
+            ),
+            radial-gradient(
+                100% 100% at 88% 12%,
+                color-mix(in oklch, var(--color-info-400) 45%, transparent),
+                transparent 55%
+            ),
+            radial-gradient(
+                95% 95% at 78% 92%,
+                color-mix(in oklch, var(--color-primary-700) 65%, transparent),
+                transparent 60%
+            ),
+            linear-gradient(155deg, var(--color-secondary-900), var(--color-secondary-950));
+    }
+
+    /* A fine grid, fading out before it reaches the text. */
+    .me-auth__aside::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background-image:
+            linear-gradient(to right, rgb(255 255 255 / 0.07) 1px, transparent 1px),
+            linear-gradient(to bottom, rgb(255 255 255 / 0.07) 1px, transparent 1px);
+        background-size: 3.5rem 3.5rem;
+        mask-image: radial-gradient(120% 100% at 25% 0%, #000 25%, transparent 78%);
+    }
+
+    .me-auth__image {
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /*
+     * A photograph carries its own contrast, and text over it needs a scrim
+     * rather than a gradient competing with it.
+     */
+    .me-auth__aside:has(.me-auth__image)::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(
+            160deg,
+            color-mix(in oklch, var(--color-secondary-950) 55%, transparent),
+            color-mix(in oklch, var(--color-secondary-950) 85%, transparent)
+        );
+    }
+
+    .me-auth__aside:has(.me-auth__image)::before {
+        display: none;
+    }
+
+    .me-auth__aside-content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+        justify-content: flex-end;
+        height: 100%;
+        padding: 3rem;
+    }
+
+    .me-auth__aside .me-auth__brand {
+        color: inherit;
+        font-size: 1.25rem;
+    }
+
+    .me-auth__tagline {
+        font-size: clamp(1.5rem, 1.1rem + 1.1vw, 2.125rem);
+        font-weight: 600;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        max-width: 22ch;
+        text-wrap: balance;
+    }
+
+    .me-auth__aside-text {
+        font-size: 0.9375rem;
+        line-height: 1.6;
+        max-width: 42ch;
+        color: color-mix(in oklch, var(--color-secondary-50) 78%, transparent);
+    }
+
+    @media (width >= 64rem) {
+        .me-auth--split {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        .me-auth--split .me-auth__aside {
+            display: block;
+        }
+
+        /* The visual half moves; the form stays first in the DOM. */
+        .me-auth--split.me-auth--reverse .me-auth__aside {
+            order: -1;
+        }
+
+        .me-auth__main {
+            padding: 4rem 3.5rem;
+        }
+
+        .me-auth--split .me-auth__panel {
+            max-width: 27rem;
+        }
+
+        /*
+         * On a split screen the panel is already the container, so the card's
+         * border, fill and padding would be a box inside a box. Reset rather
+         * than dropped from the markup: the same layout still uses the card on
+         * one column, where the outline is what gives the form an edge.
+         */
+        .me-auth--split :where(.me-auth__card) {
+            border: 0;
+            background-color: transparent;
+            box-shadow: none;
+        }
+
+        .me-auth--split :where(.me-auth__card > .me-card__body) {
+            padding: 0;
+        }
+
+        /* A form standing on the page needs more air than one inside a card. */
+        .me-auth--split :where(.me-auth__card .me-stack) {
+            gap: 1.25rem;
+        }
+    }
+
+    /*
+     * Left-aligned, like the form beneath it. A centred heading over
+     * left-aligned fields is the detail that made the old screen read as a
+     * greeting card rather than a page.
+     */
     .me-auth__brand {
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         gap: 0.625rem;
         font-size: 1.125rem;
         font-weight: 600;
@@ -304,21 +477,22 @@
     }
 
     .me-auth__heading {
-        font-size: 1.25rem;
+        font-size: clamp(1.5rem, 1.35rem + 0.6vw, 1.875rem);
         font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
         color: var(--color-content);
-        text-align: center;
     }
 
     .me-auth__subheading {
-        margin-top: 0.25rem;
-        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        font-size: 0.9375rem;
+        line-height: 1.6;
         color: var(--color-content-muted);
-        text-align: center;
+        max-width: 42ch;
     }
 
     .me-auth__footer {
-        text-align: center;
         font-size: 0.875rem;
         color: var(--color-content-muted);
     }

@@ -70,6 +70,63 @@ it('renders the auth layout', function () {
         ->toContain('me-card');
 });
 
+it('splits the auth layout in two halves by default', function () {
+    $html = Blade::render('<x-me::layouts.auth heading="Sign in">form</x-me::layouts.auth>');
+
+    expect($html)
+        ->toContain('me-auth--split')
+        ->toContain('me-auth__aside')
+        // With no tagline the brand name fills the visual half, so it is never
+        // an empty panel.
+        ->toContain('me-auth__tagline');
+});
+
+it('takes a photograph on the visual half', function () {
+    $html = Blade::render('<x-me::layouts.auth image="/img/login.jpg" tagline="One place">form</x-me::layouts.auth>');
+
+    expect($html)
+        ->toContain('me-auth__image')
+        ->toContain('src="/img/login.jpg"')
+        // Decorative: the screen already says what the image says.
+        ->toContain('alt=""')
+        ->toContain('One place');
+});
+
+it('flips the halves without moving the form in the DOM', function () {
+    $html = Blade::render('<x-me::layouts.auth reverse>form</x-me::layouts.auth>');
+
+    expect($html)->toContain('me-auth--reverse');
+
+    // The form column still comes first; only CSS order changes.
+    expect(strpos($html, 'me-auth__main'))->toBeLessThan((int) strpos($html, 'me-auth__aside'));
+});
+
+it('gives the single centred column back when asked', function () {
+    $html = Blade::render('<x-me::layouts.auth :split="false" reverse>form</x-me::layouts.auth>');
+
+    expect($html)
+        ->not->toContain('me-auth--split')
+        ->not->toContain('me-auth--reverse')
+        ->not->toContain('me-auth__aside')
+        ->toContain('me-auth__panel');
+});
+
+it('replaces the visual half content through the aside slot', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-me::layouts.auth>
+            <x-slot:aside>
+                <p class="me-auth__aside-text">Trusted by teams</p>
+            </x-slot:aside>
+
+            form
+        </x-me::layouts.auth>
+        BLADE);
+
+    expect($html)
+        ->toContain('Trusted by teams')
+        ->not->toContain('me-auth__tagline');
+});
+
 it('colours error pages by severity', function () {
     expect(Blade::render('<x-me::layouts.error status="404" title="Not found">missing</x-me::layouts.error>'))
         ->toContain('me-error-page--warning')

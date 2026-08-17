@@ -105,7 +105,7 @@ which are merged onto its root element.
 | `x-me::nav.item` | `href` `icon` `active` `badge` |
 | `x-me::nav.subitem` | `href` `active` |
 | `x-me::layouts.admin` | `title` `heading` `subheading` `nav` `topbar` `actions` `user` `footer` `sidebarFooter` |
-| `x-me::layouts.auth` | `title` `heading` `subheading` `footer` |
+| `x-me::layouts.auth` | `title` `heading` `subheading` `footer` `split`(true) `image` `tagline` `reverse`(false) + `aside` slot |
 | `x-me::layouts.error` | `status` `title` `icon` `severity` `home`(true) `back`(true) |
 | `x-me::layouts.head` | `title` |
 | `x-me::livewire.filters` | `table` |
@@ -636,6 +636,26 @@ The endpoints the screens target, all Fortify's:
 The Blade two-factor challenge switches to the recovery field through
 `?recovery=1` — no JavaScript, and the back button works. The avatar is a file
 field named `avatar`; the package stores nothing.
+
+### The layout
+
+Every full-page screen renders through `layouts.auth` / `MeAuthLayout`, which is
+**two halves at 64rem and up**: the form on one side, a visual on the other.
+Below that it is one column and the visual half is `display: none`, so a phone
+never downloads the image.
+
+| Prop | Effect |
+|---|---|
+| `split` (true) | False gives the single centred column |
+| `image` | Photograph on the visual half, as an `<img>` with `alt=""` and a scrim |
+| `tagline` | Large line over the visual half; falls back to the brand name |
+| `reverse` (false) | Visual half on the left — the form stays first in the DOM |
+| `aside` slot | Replaces the content over the visual half entirely |
+
+With no `image` the half is a gradient built from `--color-primary-*` and
+`--color-info-*`, so remapping the roles moves it too. The screens forward all
+four props and the slot, so `<MeLoginScreen image="…" tagline="…" reverse />`
+works.
 
 ---
 

@@ -382,7 +382,12 @@ export const MeUserMenu = defineComponent({
 export { MeDropdownItem }
 
 /**
- * Centred single-column layout for login, registration and password screens.
+ * Layout for login, registration and password screens: two halves on a wide
+ * screen, one column below 64rem.
+ *
+ * `image` puts a photograph on the visual half; without one it is a gradient
+ * built from the role tokens. The `aside` slot replaces the content over it,
+ * and `:split="false"` gives the single centred column.
  *
  * Like MeAdminLayout this renders body content rather than a document: the
  * Blade version emits <html> and <head>, which a Vue application owns.
@@ -395,35 +400,67 @@ export const MeAuthLayout = defineComponent({
         subheading: { type: String as PropType<string | null>, default: null },
         brandName: { type: String as PropType<string | null>, default: null },
         brandHref: { type: String, default: '/' },
+        /** False for the single centred column. */
+        split: { type: Boolean, default: true },
+        image: { type: String as PropType<string | null>, default: null },
+        tagline: { type: String as PropType<string | null>, default: null },
+        /** Puts the visual half on the left; the form stays first in the DOM. */
+        reverse: { type: Boolean, default: false },
         ...linkAsProp,
     },
 
     setup(props, { slots }) {
         return () =>
-            h('div', { class: 'me-auth' }, [
-                h('div', { class: 'me-auth__panel' }, [
-                    slots.brand?.() ??
-                        h(MeBrand, {
-                            class: 'me-auth__brand',
-                            name: props.brandName,
-                            href: props.brandHref,
-                            as: props.as,
-                        }),
+            h(
+                'div',
+                {
+                    class: [
+                        'me-auth',
+                        { 'me-auth--split': props.split, 'me-auth--reverse': props.split && props.reverse },
+                    ],
+                },
+                [
+                    h('div', { class: 'me-auth__main' }, [
+                        h('div', { class: 'me-auth__panel' }, [
+                            slots.brand?.() ??
+                                h(MeBrand, {
+                                    class: 'me-auth__brand',
+                                    name: props.brandName,
+                                    href: props.brandHref,
+                                    as: props.as,
+                                }),
 
-                    h('div', [
-                        props.heading ? h('h1', { class: 'me-auth__heading' }, props.heading) : null,
-                        props.subheading ? h('p', { class: 'me-auth__subheading' }, props.subheading) : null,
+                            h('div', [
+                                props.heading ? h('h1', { class: 'me-auth__heading' }, props.heading) : null,
+                                props.subheading
+                                    ? h('p', { class: 'me-auth__subheading' }, props.subheading)
+                                    : null,
+                            ]),
+
+                            // Where Blade reads session('status'), a Vue
+                            // application passes whatever its own flash
+                            // mechanism produced.
+                            slots.status?.(),
+
+                            h(MeCard, { class: 'me-auth__card' }, { default: () => slots.default?.() }),
+
+                            slots.footer ? h('p', { class: 'me-auth__footer' }, slots.footer()) : null,
+                        ]),
                     ]),
 
-                    // Where Blade reads session('status'), a Vue application
-                    // passes whatever its own flash mechanism produced.
-                    slots.status?.(),
+                    props.split
+                        ? h('aside', { class: 'me-auth__aside' }, [
+                              // Decorative: the screen says everything it does.
+                              props.image ? h('img', { class: 'me-auth__image', src: props.image, alt: '' }) : null,
 
-                    h(MeCard, null, { default: () => slots.default?.() }),
-
-                    slots.footer ? h('p', { class: 'me-auth__footer' }, slots.footer()) : null,
-                ]),
-            ])
+                              h('div', { class: 'me-auth__aside-content' }, [
+                                  slots.aside?.() ??
+                                      h('p', { class: 'me-auth__tagline' }, props.tagline ?? props.brandName ?? ''),
+                              ]),
+                          ])
+                        : null,
+                ],
+            )
     },
 })
 

@@ -33,11 +33,28 @@ const formProps = {
     status: { type: String as PropType<string | null>, default: null },
 }
 
+/** Forwarded to MeAuthLayout, so a screen is configured where it is used. */
 const layoutProps = {
     heading: { type: String as PropType<string | null>, default: null },
     subheading: { type: String as PropType<string | null>, default: null },
     brandName: { type: String as PropType<string | null>, default: null },
+    split: { type: Boolean, default: true },
+    image: { type: String as PropType<string | null>, default: null },
+    tagline: { type: String as PropType<string | null>, default: null },
+    reverse: { type: Boolean, default: false },
     ...linkAsProp,
+}
+
+interface LayoutForwarded {
+    heading: string | null
+    subheading: string | null
+    brandName: string | null
+    status: string | null
+    split: boolean
+    image: string | null
+    tagline: string | null
+    reverse: boolean
+    as: unknown
 }
 
 function error(errors: Errors, key: string): string | null {
@@ -45,11 +62,12 @@ function error(errors: Errors, key: string): string | null {
 }
 
 function frame(
-    props: { heading: string | null; subheading: string | null; brandName: string | null; status: string | null; as: unknown },
+    props: LayoutForwarded,
     fallbackHeading: string,
     fallbackSubheading: string,
     body: unknown[],
     footer?: () => unknown,
+    aside?: () => unknown,
 ): VNode {
     return h(
         MeAuthLayout,
@@ -57,12 +75,17 @@ function frame(
             heading: props.heading ?? fallbackHeading,
             subheading: props.subheading ?? fallbackSubheading,
             brandName: props.brandName,
+            split: props.split,
+            image: props.image,
+            tagline: props.tagline,
+            reverse: props.reverse,
             as: props.as,
         } as never,
         {
             ...(props.status ? { status: () => h(MeAlert, { variant: 'success' }, () => props.status) } : {}),
             default: () => body,
             ...(footer ? { footer } : {}),
+            ...(aside ? { aside } : {}),
         },
     )
 }
@@ -148,7 +171,7 @@ export const MeLoginScreen = defineComponent({
 
     emits: ['submit', 'passkey'],
 
-    setup(props, { emit }) {
+    setup(props, { emit, slots }) {
         const email = ref('')
         const password = ref('')
         const remember = ref(false)
@@ -235,6 +258,7 @@ export const MeLoginScreen = defineComponent({
                           ),
                       ]
                     : undefined,
+                slots.aside,
             )
     },
 })
@@ -250,7 +274,7 @@ export const MeRegisterScreen = defineComponent({
 
     emits: ['submit'],
 
-    setup(props, { emit }) {
+    setup(props, { emit, slots }) {
         const name = ref('')
         const email = ref('')
         const password = ref('')
@@ -332,6 +356,7 @@ export const MeRegisterScreen = defineComponent({
                         t('auth.signIn'),
                     ),
                 ],
+                slots.aside,
             )
     },
 })
@@ -347,7 +372,7 @@ export const MeForgotPasswordScreen = defineComponent({
 
     emits: ['submit'],
 
-    setup(props, { emit }) {
+    setup(props, { emit, slots }) {
         const email = ref('')
 
         function submit(event: Event): void {
@@ -386,6 +411,7 @@ export const MeForgotPasswordScreen = defineComponent({
                         t('auth.backToSignIn'),
                     ),
                 ],
+                slots.aside,
             )
     },
 })
@@ -403,7 +429,7 @@ export const MeResetPasswordScreen = defineComponent({
 
     emits: ['submit'],
 
-    setup(props, { emit }) {
+    setup(props, { emit, slots }) {
         const email = ref(props.email)
         const password = ref('')
         const confirmation = ref('')
@@ -420,49 +446,56 @@ export const MeResetPasswordScreen = defineComponent({
         }
 
         return () =>
-            frame(props, t('auth.resetHeading'), t('auth.resetSubheading'), [
-                h('form', { class: 'me-stack', onSubmit: submit }, [
-                    h(MeInput, {
-                        name: 'email',
-                        type: 'email',
-                        label: t('auth.email'),
-                        autocomplete: 'username',
-                        required: true,
-                        error: error(props.errors, 'email'),
-                        modelValue: email.value,
-                        'onUpdate:modelValue': (value: string | number | null) => (email.value = String(value ?? '')),
-                    }),
+            frame(
+                props,
+                t('auth.resetHeading'),
+                t('auth.resetSubheading'),
+                [
+                    h('form', { class: 'me-stack', onSubmit: submit }, [
+                        h(MeInput, {
+                            name: 'email',
+                            type: 'email',
+                            label: t('auth.email'),
+                            autocomplete: 'username',
+                            required: true,
+                            error: error(props.errors, 'email'),
+                            modelValue: email.value,
+                            'onUpdate:modelValue': (value: string | number | null) => (email.value = String(value ?? '')),
+                        }),
 
-                    h(MeInput, {
-                        name: 'password',
-                        type: 'password',
-                        label: t('auth.newPassword'),
-                        autocomplete: 'new-password',
-                        required: true,
-                        error: error(props.errors, 'password'),
-                        modelValue: password.value,
-                        'onUpdate:modelValue': (value: string | number | null) => (password.value = String(value ?? '')),
-                    }),
+                        h(MeInput, {
+                            name: 'password',
+                            type: 'password',
+                            label: t('auth.newPassword'),
+                            autocomplete: 'new-password',
+                            required: true,
+                            error: error(props.errors, 'password'),
+                            modelValue: password.value,
+                            'onUpdate:modelValue': (value: string | number | null) => (password.value = String(value ?? '')),
+                        }),
 
-                    h(MeInput, {
-                        name: 'password_confirmation',
-                        type: 'password',
-                        label: t('auth.confirmPassword'),
-                        autocomplete: 'new-password',
-                        required: true,
-                        error: error(props.errors, 'password_confirmation'),
-                        modelValue: confirmation.value,
-                        'onUpdate:modelValue': (value: string | number | null) =>
-                            (confirmation.value = String(value ?? '')),
-                    }),
+                        h(MeInput, {
+                            name: 'password_confirmation',
+                            type: 'password',
+                            label: t('auth.confirmPassword'),
+                            autocomplete: 'new-password',
+                            required: true,
+                            error: error(props.errors, 'password_confirmation'),
+                            modelValue: confirmation.value,
+                            'onUpdate:modelValue': (value: string | number | null) =>
+                                (confirmation.value = String(value ?? '')),
+                        }),
 
-                    h(
-                        MeButton,
-                        { type: 'submit', variant: 'primary', block: true, loading: props.processing },
-                        () => t('auth.resetSubmit'),
-                    ),
-                ]),
-            ])
+                        h(
+                            MeButton,
+                            { type: 'submit', variant: 'primary', block: true, loading: props.processing },
+                            () => t('auth.resetSubmit'),
+                        ),
+                    ]),
+                ],
+                undefined,
+                slots.aside,
+            )
     },
 })
 
@@ -479,7 +512,7 @@ export const MeConfirmPasswordScreen = defineComponent({
 
     emits: ['submit', 'passkey'],
 
-    setup(props, { emit }) {
+    setup(props, { emit, slots }) {
         const password = ref('')
 
         const passkey = usePasskey(
@@ -498,28 +531,35 @@ export const MeConfirmPasswordScreen = defineComponent({
         }
 
         return () =>
-            frame(props, t('auth.confirmHeading'), t('auth.confirmSubheading'), [
-                h('form', { class: 'me-stack', onSubmit: submit }, [
-                    h(MeInput, {
-                        name: 'password',
-                        type: 'password',
-                        label: t('auth.password'),
-                        autocomplete: 'current-password',
-                        required: true,
-                        error: error(props.errors, 'password'),
-                        modelValue: password.value,
-                        'onUpdate:modelValue': (value: string | number | null) => (password.value = String(value ?? '')),
-                    }),
+            frame(
+                props,
+                t('auth.confirmHeading'),
+                t('auth.confirmSubheading'),
+                [
+                    h('form', { class: 'me-stack', onSubmit: submit }, [
+                        h(MeInput, {
+                            name: 'password',
+                            type: 'password',
+                            label: t('auth.password'),
+                            autocomplete: 'current-password',
+                            required: true,
+                            error: error(props.errors, 'password'),
+                            modelValue: password.value,
+                            'onUpdate:modelValue': (value: string | number | null) => (password.value = String(value ?? '')),
+                        }),
 
-                    h(
-                        MeButton,
-                        { type: 'submit', variant: 'primary', block: true, loading: props.processing },
-                        () => t('auth.confirmSubmit'),
-                    ),
-                ]),
+                        h(
+                            MeButton,
+                            { type: 'submit', variant: 'primary', block: true, loading: props.processing },
+                            () => t('auth.confirmSubmit'),
+                        ),
+                    ]),
 
-                props.passkeys ? passkeyBlock(passkey, t('auth.confirmWithPasskey')) : null,
-            ])
+                    props.passkeys ? passkeyBlock(passkey, t('auth.confirmWithPasskey')) : null,
+                ],
+                undefined,
+                slots.aside,
+            )
     },
 })
 
@@ -535,30 +575,37 @@ export const MeVerifyEmailScreen = defineComponent({
 
     emits: ['resend', 'sign-out'],
 
-    setup(props, { emit }) {
+    setup(props, { emit, slots }) {
         return () =>
-            frame(props, t('auth.verifyHeading'), t('auth.verifySubheading'), [
-                h('div', { class: 'me-stack' }, [
-                    props.sent ? h(MeAlert, { variant: 'success' }, () => props.status ?? '') : null,
+            frame(
+                props,
+                t('auth.verifyHeading'),
+                t('auth.verifySubheading'),
+                [
+                    h('div', { class: 'me-stack' }, [
+                        props.sent ? h(MeAlert, { variant: 'success' }, () => props.status ?? '') : null,
 
-                    h('p', { class: 'me-hint' }, t('auth.verifyText')),
+                        h('p', { class: 'me-hint' }, t('auth.verifyText')),
 
-                    h(
-                        MeButton,
-                        {
-                            variant: 'primary',
-                            block: true,
-                            loading: props.processing,
-                            onClick: () => emit('resend'),
-                        },
-                        () => t('auth.verifyResend'),
-                    ),
+                        h(
+                            MeButton,
+                            {
+                                variant: 'primary',
+                                block: true,
+                                loading: props.processing,
+                                onClick: () => emit('resend'),
+                            },
+                            () => t('auth.verifyResend'),
+                        ),
 
-                    h(MeButton, { variant: 'ghost', block: true, onClick: () => emit('sign-out') }, () =>
-                        t('auth.signOut'),
-                    ),
-                ]),
-            ])
+                        h(MeButton, { variant: 'ghost', block: true, onClick: () => emit('sign-out') }, () =>
+                            t('auth.signOut'),
+                        ),
+                    ]),
+                ],
+                undefined,
+                slots.aside,
+            )
     },
 })
 
@@ -569,7 +616,7 @@ export const MeTwoFactorChallengeScreen = defineComponent({
 
     emits: ['submit'],
 
-    setup(props, { emit }) {
+    setup(props, { emit, slots }) {
         const recovery = ref(false)
         const code = ref('')
         const recoveryCode = ref('')
@@ -633,6 +680,7 @@ export const MeTwoFactorChallengeScreen = defineComponent({
                         recovery.value ? t('auth.useAuthCode') : t('auth.useRecoveryCode'),
                     ]),
                 ],
+                slots.aside,
             )
     },
 })

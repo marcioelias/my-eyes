@@ -496,6 +496,60 @@ describe('layouts', () => {
         expect(wrapper.find('.me-auth__footer').text()).toBe('No account?')
     })
 
+    it('MeAuthLayout splits in two halves by default', () => {
+        const wrapper = mount(MeAuthLayout, { props: { brandName: 'Acme' }, slots: { default: () => 'form' } })
+
+        expect(wrapper.classes()).toContain('me-auth--split')
+        expect(wrapper.find('.me-auth__aside').exists()).toBe(true)
+        // With no tagline the brand fills the half, so it is never empty.
+        expect(wrapper.find('.me-auth__tagline').text()).toBe('Acme')
+    })
+
+    it('MeAuthLayout takes a photograph, marked decorative', () => {
+        const wrapper = mount(MeAuthLayout, {
+            props: { image: '/img/login.jpg', tagline: 'One place' },
+            slots: { default: () => 'form' },
+        })
+
+        const image = wrapper.find('.me-auth__image')
+
+        expect(image.attributes('src')).toBe('/img/login.jpg')
+        expect(image.attributes('alt')).toBe('')
+        expect(wrapper.find('.me-auth__tagline').text()).toBe('One place')
+    })
+
+    it('MeAuthLayout flips the halves without moving the form in the DOM', () => {
+        const wrapper = mount(MeAuthLayout, { props: { reverse: true }, slots: { default: () => 'form' } })
+
+        expect(wrapper.classes()).toContain('me-auth--reverse')
+
+        // Only CSS order changes; the form column is still first.
+        const children = Array.from(wrapper.element.children).map((child) => child.className)
+
+        expect(children[0]).toContain('me-auth__main')
+        expect(children[1]).toContain('me-auth__aside')
+    })
+
+    it('MeAuthLayout gives the single centred column back when asked', () => {
+        const wrapper = mount(MeAuthLayout, {
+            props: { split: false, reverse: true },
+            slots: { default: () => 'form' },
+        })
+
+        expect(wrapper.classes()).not.toContain('me-auth--split')
+        expect(wrapper.classes()).not.toContain('me-auth--reverse')
+        expect(wrapper.find('.me-auth__aside').exists()).toBe(false)
+    })
+
+    it('MeAuthLayout replaces the visual half through the aside slot', () => {
+        const wrapper = mount(MeAuthLayout, {
+            slots: { default: () => 'form', aside: () => 'Trusted by teams' },
+        })
+
+        expect(wrapper.find('.me-auth__aside-content').text()).toBe('Trusted by teams')
+        expect(wrapper.find('.me-auth__tagline').exists()).toBe(false)
+    })
+
     it('MeErrorLayout derives severity from the status code', () => {
         expect(mount(MeErrorLayout, { props: { status: 404 } }).classes()).toContain('me-error-page--warning')
         expect(mount(MeErrorLayout, { props: { status: 500 } }).classes()).toContain('me-error-page--danger')

@@ -47,6 +47,27 @@ endpoints Fortify actually exposes.
   of which are its business. Recorded as
   `0003-vue-screens-emit-instead-of-submitting.md`.
 
+### The layout
+
+- **BR-18** — Every full-page screen renders through one layout, which is two
+  halves at 64rem and up: the form on one side, a visual on the other. Below
+  that it is one column, and the visual half is `display: none` rather than
+  hidden by opacity or position — a phone must not download an image it will
+  never see.
+- **BR-19** — The visual half never needs configuring to look finished. With no
+  `image` it is a gradient built from the role tokens, and with no `tagline` the
+  brand name fills it. Remapping the roles moves it, like everything else.
+- **BR-20** — The form column is first in the DOM whichever side it is placed
+  on. `reverse` moves the visual half with CSS `order`, so a keyboard or a
+  screen reader always reaches the fields before the decoration.
+- **BR-21** — A photograph is an `<img>` with an empty `alt`, not a
+  `background-image`: it is decorative, it must not be announced, and the URL
+  must never be interpolated into CSS. Text over it gets a scrim rather than
+  the gradient, which would compete with the picture.
+- **BR-22** — On two halves the panel is the container, so the card's border,
+  fill and padding are reset — a box inside a box. On one column the card keeps
+  its chrome, because there the outline is what gives the form an edge.
+
 ### Two-factor
 
 - **BR-04** — Two-factor is Fortify's, used as it is. The screens speak to
@@ -241,6 +262,14 @@ code ⇄ recovery code
   other does not have.
 - **AC-09** — Given the profile screen with an avatar URL, when it renders,
   then the image is shown; given none, then the initials are.
+- **AC-10** — Given no props at all, when a full-page screen renders, then it
+  carries the split modifier, a visual half, and a tagline holding the brand
+  name.
+- **AC-11** — Given `reverse`, when the screen renders, then the form column
+  still precedes the visual half in the DOM.
+- **AC-12** — Given `:split="false"`, then neither the split modifier, the
+  reverse modifier nor the visual half is rendered.
+- **AC-13** — Given an `aside` slot, then its content replaces the tagline.
 
 ## Out of Scope
 

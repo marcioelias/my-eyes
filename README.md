@@ -538,6 +538,22 @@ conventional Laravel route names (`login`, `password.request`, `profile.edit`),
 so publish them over a Breeze or Fortify install and the wiring is already
 there. `my-eyes` deliberately does not ship an auth backend.
 
+The screens are **two halves from 64rem up** — form on one side, a visual on the
+other — and one column below that, where the visual half is `display: none` so a
+phone never downloads the image:
+
+```blade
+<x-me::layouts.auth heading="Sign in" image="{{ asset('img/login.jpg') }}" tagline="One place for everything">
+    {{-- your form --}}
+</x-me::layouts.auth>
+```
+
+`image` is optional: without it the half is a gradient built from the role
+tokens, and without a `tagline` the brand name fills it. `reverse` puts the
+visual on the left, `:split="false"` gives the single centred column, and the
+`aside` slot replaces the content over the visual entirely. All of it works the
+same in Vue, through `MeAuthLayout` or forwarded by any screen.
+
 Every screen exists twice: as a published Blade view, and as a Vue export that
 renders the same markup. The Vue screens emit their payload and let the
 application make the request:

@@ -59,6 +59,20 @@ describe('MeLoginScreen', () => {
         expect(wrapper.text()).toContain('Sign in with a passkey')
     })
 
+    it('forwards the layout props and the aside slot', () => {
+        const wrapper = mount(MeLoginScreen, {
+            props: { image: '/img/login.jpg', tagline: 'One place', reverse: true },
+        })
+
+        expect(wrapper.find('.me-auth').classes()).toContain('me-auth--reverse')
+        expect(wrapper.find('.me-auth__image').attributes('src')).toBe('/img/login.jpg')
+        expect(wrapper.find('.me-auth__tagline').text()).toBe('One place')
+
+        const custom = mount(MeLoginScreen, { slots: { aside: () => 'Trusted by teams' } })
+
+        expect(custom.find('.me-auth__aside-content').text()).toBe('Trusted by teams')
+    })
+
     it('renders the errors it is given', () => {
         const wrapper = mount(MeLoginScreen, {
             props: { errors: { email: 'These credentials do not match our records.' } },

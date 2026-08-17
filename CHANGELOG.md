@@ -6,6 +6,34 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-17
+
+### Changed
+
+- **The authentication screens are two halves on a wide screen** — form on one
+  side, a visual on the other — and one column below 64rem. Any application on
+  0.4.0 gets the new look on upgrade without changing a line; `:split="false"`
+  restores the single centred column exactly.
+- The form column grew to 27rem and carries its own padding and rhythm. The old
+  screen put a 25rem card in the middle of an empty viewport, which reads as
+  cramped however much padding it has: the space was on the outside, where it
+  did nothing.
+- Heading, subheading, brand and footer are left-aligned, with the heading on a
+  `clamp()` scale. A centred heading over left-aligned fields was the detail
+  that made the screen read as a greeting card.
+- On two halves the card's border, fill and padding are reset — the panel is
+  already the container. On one column the card keeps its chrome.
+
+### Added
+
+- `layouts.auth` and `MeAuthLayout` take `split`, `image`, `tagline` and
+  `reverse`, plus an `aside` slot for the visual half. Every full-page screen
+  forwards all of them.
+- With no image the visual half is a gradient built from `--color-primary-*` and
+  `--color-info-*`, so remapping the roles moves it too — and it costs no bytes.
+  A photograph is an `<img>` with `alt=""` and a scrim, never a
+  `background-image`: decorative, unannounced, and no URL interpolated into CSS.
+
 ## [0.4.0] - 2026-08-17
 
 ### Added
@@ -171,7 +199,8 @@ All notable changes to this project are documented here. The format follows
   Composer refuses to install the earlier versions — supporting them would
   produce an unsolvable dependency set rather than a working install.
 
-[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/marcioelias/my-eyes/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/marcioelias/my-eyes/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/marcioelias/my-eyes/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/marcioelias/my-eyes/compare/v0.3.0...v0.3.1
