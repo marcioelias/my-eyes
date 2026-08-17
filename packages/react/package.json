@@ -1,6 +1,6 @@
 {
   "name": "@my-eyes/react",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "my-eyes components for React 19 — the same design system, the same server-driven table and the same auth screens",
   "type": "module",
   "files": [
@@ -21,11 +21,11 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {
-    "@my-eyes/core": "^0.5.0",
+    "@my-eyes/core": "^0.6.0",
     "react": "^19.0.0"
   },
   "devDependencies": {
-    "@my-eyes/core": "^0.5.0",
+    "@my-eyes/core": "^0.6.0",
     "@types/react": "^19.2.0",
     "react": "^19.2.0",
     "typescript": "^5.7.0"
