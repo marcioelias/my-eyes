@@ -35,6 +35,7 @@
 @import './components/filters.css';
 @import './components/nav.css';
 @import './components/shell.css';
+@import './components/security.css';
 
 /* Last: the focus treatment overrides per-component borders and shadows. */
 @import './components/focus.css';

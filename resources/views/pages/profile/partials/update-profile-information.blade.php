@@ -2,9 +2,27 @@
     :title="__('my-eyes::auth.profile.information')"
     :description="__('my-eyes::auth.profile.information_text')"
 >
-    <form method="POST" action="{{ route('profile.update') }}" class="me-stack">
+    {{--
+        The avatar is posted as a plain file field named "avatar". Storing,
+        resizing and serving it are the application's — this package ships no
+        storage driver and never has.
+    --}}
+    <form method="POST" action="{{ route('profile.update') }}" class="me-stack" enctype="multipart/form-data">
         @csrf
         @method('patch')
+
+        <div class="me-avatar-field">
+            <x-me::avatar :name="$user->name" :src="$user->avatar_url" size="xl" />
+
+            <div class="me-avatar-field__control">
+                <x-me::upload
+                    name="avatar"
+                    accept="image/png,image/jpeg,image/webp"
+                    :label="__('my-eyes::auth.profile.avatar')"
+                    :hint="__('my-eyes::auth.profile.avatar_text')"
+                />
+            </div>
+        </div>
 
         <x-me::input
             name="name"

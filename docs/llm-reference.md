@@ -408,6 +408,34 @@ Also exported: `buildQueryString` `readQueryFromUrl` `computeVirtualWindow`
 `fitValues` `findField` `findOperator`), the icon set (`icons`, `IconName`),
 and the theme, select, numeric, upload and dismissable headless models.
 
+Passkeys — the WebAuthn ceremony, with no dependency of its own:
+
+```ts
+isPasskeySupported(): boolean
+isPasskeyAutofillSupported(): Promise<boolean>
+
+registerPasskey(options?): Promise<Response>          // POST /user/passkeys
+authenticateWithPasskey(options?): Promise<Response>  // POST /passkeys/login
+confirmWithPasskey(options?): Promise<Response>       // POST /passkeys/confirm
+```
+
+`options`: `optionsUrl` `url` `name` `mediation` `signal` `fetcher`, all
+optional — the defaults are Fortify's paths. The credential is posted as
+`credential_response`, a **JSON string**, with the CSRF token from the
+`csrf-token` meta tag or the `XSRF-TOKEN` cookie.
+
+Each rejects with `PasskeyCancelled` when the person dismissed the browser
+prompt — not an error to display — and `PasskeyError` for everything else.
+Also exported: `toCreationOptions` `toRequestOptions` `credentialToJson`
+`base64UrlToBuffer` `bufferToBase64Url`.
+
+In Blade there is nothing to import. A button carries
+`data-me-passkey="login" | "register" | "confirm"`, optionally
+`data-options-url`, `data-url`, `data-redirect` and `data-name-from`
+(a selector for the input naming a new passkey). Anything marked
+`data-me-passkey-only` is hidden where WebAuthn is unavailable, and
+`[data-me-passkey-error]` receives the message.
+
 The individual DOM bindings are exported too, for a component framework that
 knows exactly which element it mounted: `initDropdowns` `initModals`
 `initTooltips` `initToasts` `initSelects` `initUploads` `initNumericInputs`
@@ -539,7 +567,79 @@ not `.vue` files — this is an authoring choice and does not affect consumers.
 
 ---
 
-## 9. Configuration
+## 9. Authentication screens
+
+Every screen exists twice: a Blade view published with `--tag=my-eyes-pages`
+and edited by the application, and a Vue export configured by props. Both
+render the same markup. The package still ships **no route and no controller**;
+the screens target Fortify's conventional names and paths.
+
+| Screen | Blade view | Vue export |
+|---|---|---|
+| Sign in (+ passkey) | `pages/auth/login` | `MeLoginScreen` |
+| Register | `pages/auth/register` | `MeRegisterScreen` |
+| Forgot password | `pages/auth/forgot-password` | `MeForgotPasswordScreen` |
+| Reset password | `pages/auth/reset-password` | `MeResetPasswordScreen` |
+| Confirm password (+ passkey) | `pages/auth/confirm-password` | `MeConfirmPasswordScreen` |
+| Verify email | `pages/auth/verify-email` | `MeVerifyEmailScreen` |
+| Two-factor challenge | `pages/auth/two-factor-challenge` | `MeTwoFactorChallengeScreen` |
+| Profile: name, email, avatar | `pages/profile/partials/update-profile-information` | `MeProfileInformationCard` |
+| Profile: password | `pages/profile/partials/update-password` | `MeUpdatePasswordCard` |
+| Profile: two-factor | `pages/profile/partials/two-factor` | `MeTwoFactorCard` |
+| Profile: passkeys | `pages/profile/partials/passkeys` | `MePasskeysCard` |
+| Profile: delete account | `pages/profile/partials/delete-user` | `MeDeleteAccountCard` |
+
+**A Vue screen never performs a request and never navigates.** It emits
+`submit` with a plain object; the application makes the call.
+
+```vue
+<MeLoginScreen
+  :errors="errors" :processing="form.processing" :status="status"
+  can-register register-url="/register" forgot-url="/forgot-password"
+  @submit="payload => router.post('/login', payload)"
+  @passkey="() => router.visit('/dashboard')"
+/>
+```
+
+Shared props: `errors` (Laravel's bag, `Record<string, string>`), `processing`,
+`status`, plus `heading` `subheading` `brandName` `as` on the full-page ones.
+
+| Export | Emits | Payload or notes |
+|---|---|---|
+| `MeLoginScreen` | `submit` `passkey` | `{ email, password, remember }`; props `canRegister` `registerUrl` `canResetPassword` `forgotUrl` `passkeys` |
+| `MeRegisterScreen` | `submit` | `{ name, email, password, password_confirmation }` |
+| `MeForgotPasswordScreen` | `submit` | `{ email }` |
+| `MeResetPasswordScreen` | `submit` | `{ token, email, password, password_confirmation }` |
+| `MeConfirmPasswordScreen` | `submit` `passkey` | `{ password }` |
+| `MeVerifyEmailScreen` | `resend` `sign-out` | prop `sent` |
+| `MeTwoFactorChallengeScreen` | `submit` | `{ code }` **or** `{ recovery_code }`, never both |
+| `MeProfileInformationCard` | `submit` `resend-verification` | `{ name, email, avatar: File \| null }`; props `avatarUrl` `verified` |
+| `MeUpdatePasswordCard` | `submit` | `{ current_password, password, password_confirmation }` |
+| `MeTwoFactorCard` | `enable` `disable` `confirm` `regenerate` | props `state` (`off` \| `pending` \| `on`) `qrCode` `secretKey` `recoveryCodes` |
+| `MePasskeysCard` | `registered` `remove` | props `passkeys` (`{ id, name, lastUsed? }[]`) `optionsUrl` `url`; renders nothing without WebAuthn |
+| `MeDeleteAccountCard` | `submit` | `{ password }` |
+
+The endpoints the screens target, all Fortify's:
+
+| Flow | Method and path |
+|---|---|
+| Two-factor enable / disable | `POST` / `DELETE /user/two-factor-authentication` |
+| Two-factor confirm | `POST /user/confirmed-two-factor-authentication` (`code`) |
+| QR code / secret | `GET /user/two-factor-qr-code` · `GET /user/two-factor-secret-key` |
+| Recovery codes | `GET` / `POST /user/two-factor-recovery-codes` |
+| Two-factor challenge | `POST /two-factor-challenge` (`code` \| `recovery_code`) |
+| Passkey login | `GET /passkeys/login/options` · `POST /passkeys/login` |
+| Passkey register | `GET /user/passkeys/options` · `POST /user/passkeys` |
+| Passkey confirm | `GET /passkeys/confirm/options` · `POST /passkeys/confirm` |
+| Passkey delete | `DELETE /user/passkeys/{id}` |
+
+The Blade two-factor challenge switches to the recovery field through
+`?recovery=1` — no JavaScript, and the back button works. The avatar is a file
+field named `avatar`; the package stores nothing.
+
+---
+
+## 10. Configuration
 
 `config/my-eyes.php`: `brand.name` `brand.logo` `defaults.size`
 `defaults.button_variant` `locale` `icons` (name => inner SVG geometry, adding
@@ -548,7 +648,7 @@ to or overriding the bundled set) `layout.footer` `layout.sidebar_collapsible`
 
 ---
 
-## 10. What does not exist
+## 11. What does not exist
 
 Do not generate any of the following — they are not part of this package:
 
@@ -562,11 +662,17 @@ Do not generate any of the following — they are not part of this package:
   helpers of any kind.
 - **React, Svelte or Angular packages.** React is specified
   (`docs/features/react-package.md`) but not implemented.
-- **Vue components beyond the list in section 8.** The list is complete; there
-  is no `MeTabs`, `MeAccordion`, `MeDatePicker`, `MeCombobox`, `MeDrawer`,
-  `MePopover`, `MeStepper`, `MeBreadcrumb`, `MeSkeleton` or `MeSpinner`.
-- **Vue starter-kit screens.** Login, registration and password reset ship as
-  Blade views only. The components to build them from all exist.
+- **Vue components beyond the lists in sections 8 and 9.** They are complete;
+  there is no `MeTabs`, `MeAccordion`, `MeDatePicker`, `MeCombobox`,
+  `MeDrawer`, `MePopover`, `MeStepper`, `MeBreadcrumb`, `MeSkeleton` or
+  `MeSpinner`.
+- **A dashboard or navigation screen for Vue.** Those two Blade pages are
+  examples of an application's own screens, not authentication.
+- **An auth backend of any kind.** No Fortify actions, no WebAuthn
+  verification, no passkey model, no avatar storage, resizing or cropping. The
+  screens call the endpoints; the application implements them.
+- **SMS or email one-time codes.** The two-factor screens are TOTP plus
+  recovery codes, which is what Fortify implements.
 - **`.vue` single-file components** in the published package.
 - **Row selection, bulk actions, inline editing, column resizing, column
   reordering, CSV/Excel export, infinite scroll, grouped rows, nested filter

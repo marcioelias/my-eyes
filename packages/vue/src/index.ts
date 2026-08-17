@@ -59,6 +59,28 @@ export {
     useToasts,
 } from './overlays.js'
 
+/*
+ * The authentication screens — whole pages rather than components, and the
+ * counterpart of what `my-eyes-pages` publishes for Blade. They are exported
+ * from their own module so the parity test can count them against the pages
+ * instead of against the components.
+ */
+export {
+    MeConfirmPasswordScreen,
+    MeDeleteAccountCard,
+    MeForgotPasswordScreen,
+    MeLoginScreen,
+    MePasskeysCard,
+    MeProfileInformationCard,
+    MeRegisterScreen,
+    MeResetPasswordScreen,
+    MeTwoFactorCard,
+    MeTwoFactorChallengeScreen,
+    MeUpdatePasswordCard,
+    MeVerifyEmailScreen,
+    type Passkey,
+} from './screens.js'
+
 export {
     MeAdminLayout,
     MeAuthLayout,

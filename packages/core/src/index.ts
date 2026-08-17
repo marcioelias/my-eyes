@@ -4,6 +4,7 @@ import { initFilterPanels, initFilters } from './dom/filters.js'
 import { initDismissables, initNavigateSelects, initPasswordToggles, initThemeToggles } from './dom/misc.js'
 import { initModals } from './dom/modal.js'
 import { initNumericInputs } from './dom/numeric-input.js'
+import { initPasskeys } from './dom/passkeys.js'
 import { initSelects } from './dom/select.js'
 import { initShell } from './dom/shell.js'
 import { initToasts } from './dom/toast.js'
@@ -14,6 +15,7 @@ export * from './headless/dismissable.js'
 export * from './headless/filters.js'
 export * from './headless/i18n.js'
 export * from './headless/numeric.js'
+export * from './headless/passkeys.js'
 export * from './headless/select.js'
 export * from './headless/table.js'
 export * from './headless/theme.js'
@@ -36,6 +38,7 @@ export { initFilterPanels, initFilters } from './dom/filters.js'
 export { initDismissables, initNavigateSelects, initPasswordToggles, initThemeToggles } from './dom/misc.js'
 export { initModals, openModal } from './dom/modal.js'
 export { initNumericInputs } from './dom/numeric-input.js'
+export { initPasskeys } from './dom/passkeys.js'
 export { initSelects } from './dom/select.js'
 export { initShell } from './dom/shell.js'
 export { initToasts } from './dom/toast.js'
@@ -63,6 +66,7 @@ export function initMyEyes(root: ParentNode = document): void {
     initNavigateSelects(root)
     initFilters(root)
     initFilterPanels(root)
+    initPasskeys(root)
     initModals(root)
     initSelects(root)
     initTooltips(root)

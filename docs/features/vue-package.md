@@ -188,9 +188,10 @@ BR-07.
 - SSR of the table's first page — the component fetches on mount
 - Infinite scroll as a paging mode
 - Row selection and bulk actions
-- The starter-kit screens (login, registration, password reset). They exist as
-  Blade views only; the components to build them from are all here
 - Vue 2
+
+The authentication screens were out of scope here and are specified separately
+(`auth-screens.md`); they ship from this package as `Me*Screen` exports.
 
 ## Open Questions
 

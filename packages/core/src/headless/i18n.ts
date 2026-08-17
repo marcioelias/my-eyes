@@ -66,6 +66,83 @@ export type MessageKey =
     | 'layout.dark'
     | 'errors.goBack'
     | 'errors.backHome'
+    | 'passkey.failed'
+    | 'passkey.nameRequired'
+    | 'auth.signIn'
+    | 'auth.signInSubheading'
+    | 'auth.email'
+    | 'auth.password'
+    | 'auth.name'
+    | 'auth.currentPassword'
+    | 'auth.newPassword'
+    | 'auth.confirmPassword'
+    | 'auth.remember'
+    | 'auth.forgot'
+    | 'auth.noAccount'
+    | 'auth.signUp'
+    | 'auth.registerHeading'
+    | 'auth.registerSubheading'
+    | 'auth.registerSubmit'
+    | 'auth.haveAccount'
+    | 'auth.forgotHeading'
+    | 'auth.forgotSubheading'
+    | 'auth.forgotSubmit'
+    | 'auth.backToSignIn'
+    | 'auth.resetHeading'
+    | 'auth.resetSubheading'
+    | 'auth.resetSubmit'
+    | 'auth.verifyHeading'
+    | 'auth.verifySubheading'
+    | 'auth.verifyText'
+    | 'auth.verifyResend'
+    | 'auth.signOut'
+    | 'auth.confirmHeading'
+    | 'auth.confirmSubheading'
+    | 'auth.confirmSubmit'
+    | 'auth.challengeHeading'
+    | 'auth.challengeSubheading'
+    | 'auth.code'
+    | 'auth.recoveryCode'
+    | 'auth.useRecoveryCode'
+    | 'auth.useAuthCode'
+    | 'auth.save'
+    | 'auth.profileInformation'
+    | 'auth.profileInformationText'
+    | 'auth.unverified'
+    | 'auth.resendVerification'
+    | 'auth.avatar'
+    | 'auth.avatarText'
+    | 'auth.updatePassword'
+    | 'auth.updatePasswordText'
+    | 'auth.deleteAccount'
+    | 'auth.deleteAccountText'
+    | 'auth.deleteConfirm'
+    | 'auth.twoFactor'
+    | 'auth.twoFactorText'
+    | 'auth.twoFactorOff'
+    | 'auth.twoFactorPending'
+    | 'auth.twoFactorOn'
+    | 'auth.enable'
+    | 'auth.disable'
+    | 'auth.confirmCode'
+    | 'auth.scanText'
+    | 'auth.secretKey'
+    | 'auth.recoveryCodes'
+    | 'auth.recoveryCodesText'
+    | 'auth.regenerate'
+    | 'auth.copy'
+    | 'auth.copied'
+    | 'auth.passkeys'
+    | 'auth.passkeysText'
+    | 'auth.passkeyName'
+    | 'auth.addPasskey'
+    | 'auth.noPasskeys'
+    | 'auth.lastUsed'
+    | 'auth.never'
+    | 'auth.remove'
+    | 'auth.signInWithPasskey'
+    | 'auth.confirmWithPasskey'
+    | 'auth.or'
 
 export type Messages = Record<MessageKey, string>
 
@@ -125,6 +202,92 @@ const defaults: Messages = {
     'layout.dark': 'Dark',
     'errors.goBack': 'Go back',
     'errors.backHome': 'Back to home',
+    // Rendered by the passkey binding, in every renderer.
+    'passkey.failed': 'Could not use a passkey. Try again, or use your password.',
+    'passkey.nameRequired': 'Give this passkey a name first.',
+    /*
+     * The authentication screens. Blade renders its own from the
+     * `my-eyes::auth` translation file; these reach the screen only through
+     * the Vue screens, which have no translator of their own.
+     */
+    'auth.signIn': 'Sign in',
+    'auth.signInSubheading': 'Welcome back. Enter your details to continue.',
+    'auth.email': 'Email',
+    'auth.password': 'Password',
+    'auth.name': 'Name',
+    'auth.currentPassword': 'Current password',
+    'auth.newPassword': 'New password',
+    'auth.confirmPassword': 'Confirm password',
+    'auth.remember': 'Remember me',
+    'auth.forgot': 'Forgot password?',
+    'auth.noAccount': 'Do not have an account?',
+    'auth.signUp': 'Sign up',
+    'auth.registerHeading': 'Create your account',
+    'auth.registerSubheading': 'It only takes a minute.',
+    'auth.registerSubmit': 'Create account',
+    'auth.haveAccount': 'Already have an account?',
+    'auth.forgotHeading': 'Forgot your password?',
+    'auth.forgotSubheading': 'Tell us your email and we will send you a reset link.',
+    'auth.forgotSubmit': 'Email password reset link',
+    'auth.backToSignIn': 'Back to sign in',
+    'auth.resetHeading': 'Choose a new password',
+    'auth.resetSubheading': 'Pick something you have not used before.',
+    'auth.resetSubmit': 'Reset password',
+    'auth.verifyHeading': 'Verify your email',
+    'auth.verifySubheading': 'We sent a verification link to your inbox.',
+    'auth.verifyText':
+        'Click the link in that email to finish signing up. If it did not arrive, we can send another one.',
+    'auth.verifyResend': 'Resend verification email',
+    'auth.signOut': 'Sign out',
+    'auth.confirmHeading': 'Confirm your password',
+    'auth.confirmSubheading': 'This is a secure area. Please confirm your password to continue.',
+    'auth.confirmSubmit': 'Confirm',
+    'auth.challengeHeading': 'Two-factor authentication',
+    'auth.challengeSubheading': 'Enter the code from your authenticator app.',
+    'auth.code': 'Authentication code',
+    'auth.recoveryCode': 'Recovery code',
+    'auth.useRecoveryCode': 'Use a recovery code',
+    'auth.useAuthCode': 'Use an authentication code',
+    'auth.save': 'Save',
+    'auth.profileInformation': 'Profile information',
+    'auth.profileInformationText': 'Update your name, email address and photo.',
+    'auth.unverified': 'Your email address is unverified.',
+    'auth.resendVerification': 'Resend the verification email',
+    'auth.avatar': 'Photo',
+    'auth.avatarText': 'JPG, PNG or WebP.',
+    'auth.updatePassword': 'Update password',
+    'auth.updatePasswordText': 'Use a long, random password to stay secure.',
+    'auth.deleteAccount': 'Delete account',
+    'auth.deleteAccountText':
+        'Once deleted, all of its data is permanently removed. This cannot be undone.',
+    'auth.deleteConfirm': 'Confirm your password to continue',
+    'auth.twoFactor': 'Two-factor authentication',
+    'auth.twoFactorText': 'Add a second step to your sign-in, using an authenticator app.',
+    'auth.twoFactorOff': 'Off',
+    'auth.twoFactorPending': 'Awaiting confirmation',
+    'auth.twoFactorOn': 'On',
+    'auth.enable': 'Enable',
+    'auth.disable': 'Disable',
+    'auth.confirmCode': 'Confirm',
+    'auth.scanText': 'Scan this with your authenticator app, then enter the code it shows.',
+    'auth.secretKey': 'Or enter this key manually',
+    'auth.recoveryCodes': 'Recovery codes',
+    'auth.recoveryCodesText':
+        'Keep these somewhere safe. Each one signs you in once if you lose your authenticator.',
+    'auth.regenerate': 'Regenerate',
+    'auth.copy': 'Copy',
+    'auth.copied': 'Copied',
+    'auth.passkeys': 'Passkeys',
+    'auth.passkeysText': 'Sign in with your fingerprint, face or screen lock instead of a password.',
+    'auth.passkeyName': 'Name this device',
+    'auth.addPasskey': 'Add a passkey',
+    'auth.noPasskeys': 'No passkeys yet.',
+    'auth.lastUsed': 'Last used :when',
+    'auth.never': 'never',
+    'auth.remove': 'Remove',
+    'auth.signInWithPasskey': 'Sign in with a passkey',
+    'auth.confirmWithPasskey': 'Confirm with a passkey',
+    'auth.or': 'or',
 }
 
 let messages: Messages = { ...defaults }

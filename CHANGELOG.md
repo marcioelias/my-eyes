@@ -8,6 +8,31 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- The authentication screens now exist for Vue, not only Blade: `MeLoginScreen`,
+  `MeRegisterScreen`, `MeForgotPasswordScreen`, `MeResetPasswordScreen`,
+  `MeConfirmPasswordScreen`, `MeVerifyEmailScreen` and
+  `MeTwoFactorChallengeScreen`, plus a card per profile section. A screen emits
+  its payload and the application makes the request — the same rule the table
+  already followed, so the package still knows nothing about Inertia, CSRF or
+  routing.
+- Two-factor authentication, in both renderers, against Fortify's endpoints. The
+  card renders exactly one of Fortify's three states, and the challenge screen
+  sends `code` or `recovery_code` and never both — sending both is what produces
+  the failure that is hard to read.
+- Passkeys, in both renderers. The WebAuthn ceremony lives once in
+  `@my-eyes/core` — `registerPasskey()`, `authenticateWithPasskey()`,
+  `confirmWithPasskey()` — and Blade drives it through `data-me-passkey`. No
+  WebAuthn library was added: browsers convert the JSON themselves, and the
+  fallback for those that do not is 80 lines and directly tested.
+- A passkey affordance is never offered where it cannot work. Both renderers
+  feature-detect, and a dismissed browser prompt leaves the screen untouched
+  rather than reporting an error.
+- The profile screen takes an avatar: a plain file field named `avatar`, with
+  the initials fallback the `avatar` component already had. Storage stays the
+  application's.
+- `RendererParityTest` now counts the screens too, so a Blade page and its Vue
+  screen cannot drift apart any more than the components can.
+
 - 96 more icons — 128 in all — drawn for CRUD, ERP and CRM work: files,
   tables, commerce, people, charts, notifications and system. One family:
   24×24 grid, 1.75 stroke, round terminals.

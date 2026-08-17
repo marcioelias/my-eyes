@@ -37,6 +37,21 @@
         </x-me::button>
     </form>
 
+    {{--
+        Hidden until the binding confirms the browser can do WebAuthn: a
+        server-rendered page cannot feature-detect, and an affordance that
+        cannot work must not be offered.
+    --}}
+    <div class="me-stack" data-me-passkey-only hidden>
+        <p class="me-auth__separator">{{ __('my-eyes::auth.login.or') }}</p>
+
+        <x-me::button type="button" variant="secondary" block icon="key" data-me-passkey="login">
+            {{ __('my-eyes::auth.passkeys.sign_in') }}
+        </x-me::button>
+
+        <p class="me-error" data-me-passkey-error hidden></p>
+    </div>
+
     @if (Route::has('register'))
         <x-slot:footer>
             {{ __('my-eyes::auth.login.no_account') }}

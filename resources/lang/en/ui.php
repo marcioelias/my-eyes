@@ -23,6 +23,8 @@ return [
         'remove' => 'Remove',
         'save' => 'Save',
         'dismiss' => 'Dismiss',
+        'copy' => 'Copy',
+        'copied' => 'Copied',
     ],
 
     'password' => [

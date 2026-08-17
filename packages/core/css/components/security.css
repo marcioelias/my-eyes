@@ -1,0 +1,141 @@
+/*
+ * The security screens: passkeys, two-factor setup and the avatar field.
+ *
+ * Nothing here is a new visual language — a passkey row is a list item, a
+ * recovery code is monospace text, the QR code is a framed image. They exist
+ * as classes only because the same markup has to come out of Blade, Livewire
+ * and Vue identically.
+ */
+@layer components {
+    /* The "or" rule between a password form and the passkey button. */
+    .me-auth__separator {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-content-subtle);
+    }
+
+    .me-auth__separator::before,
+    .me-auth__separator::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background-color: var(--color-line);
+    }
+
+    .me-credential-list {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius);
+        overflow: hidden;
+    }
+
+    .me-credential {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
+    }
+
+    .me-credential + .me-credential {
+        border-top: 1px solid var(--color-line);
+    }
+
+    .me-credential__icon {
+        display: grid;
+        place-items: center;
+        width: 2rem;
+        height: 2rem;
+        flex-shrink: 0;
+        border-radius: var(--me-radius-full);
+        background-color: var(--me-primary-soft);
+        color: var(--color-primary-600);
+    }
+
+    .me-credential__body {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .me-credential__name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-content);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .me-credential__meta {
+        font-size: 0.75rem;
+        color: var(--color-content-muted);
+    }
+
+    /*
+     * Two-factor setup. The QR code keeps a white plate in every colour mode:
+     * a scanner reads dark-on-light, and inverting it in dark mode is the
+     * quickest way to ship a code that no phone can read.
+     */
+    .me-qr {
+        display: inline-grid;
+        place-items: center;
+        padding: 0.75rem;
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius);
+        background-color: #fff;
+    }
+
+    .me-qr svg,
+    .me-qr img {
+        display: block;
+        width: 10rem;
+        height: 10rem;
+    }
+
+    .me-secret {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.625rem;
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius);
+        background-color: var(--color-surface-muted);
+        font-family: var(--font-mono, ui-monospace, monospace);
+        font-size: 0.8125rem;
+        color: var(--color-content);
+        overflow-wrap: anywhere;
+    }
+
+    .me-secret__value {
+        flex: 1;
+    }
+
+    .me-recovery-codes {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+        gap: 0.25rem 0.75rem;
+        padding: 0.75rem;
+        border: 1px solid var(--color-line);
+        border-radius: var(--me-radius);
+        background-color: var(--color-surface-muted);
+        font-family: var(--font-mono, ui-monospace, monospace);
+        font-size: 0.8125rem;
+        color: var(--color-content);
+    }
+
+    /* Avatar plus its file input, side by side down to the smallest screen. */
+    .me-avatar-field {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .me-avatar-field__control {
+        min-width: 0;
+        flex: 1;
+    }
+}

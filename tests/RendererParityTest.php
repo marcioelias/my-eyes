@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 /**
- * Every Blade component has a Vue equivalent, and this is what proves it.
+ * Every Blade component has a Vue equivalent, and every published Blade screen
+ * has a Vue screen. This is what proves both.
  *
  * Parity was claimed by hand once and was wrong — the check had been made
  * against the showcase, which does not demonstrate every component. Counting
@@ -20,9 +21,39 @@ const NOT_APPLICABLE_TO_VUE = [
     'translations',
 ];
 
-function bladeComponents(): array
+/** Published Blade pages that are examples of an application's own screens. */
+const PAGES_NOT_APPLICABLE_TO_VUE = [
+    // A starting point for the application's own dashboard, not authentication.
+    'dashboard',
+    // Example navigation: every item is the application's own route.
+    'partials/navigation',
+    // The admin shell around the profile cards. MeAdminLayout is that shell,
+    // and it already counts as a component.
+    'profile/edit',
+];
+
+/** Blade page to Vue screen. Every other page is expected to have one. */
+const PAGE_TO_VUE_SCREEN = [
+    'auth/confirm-password' => 'MeConfirmPasswordScreen',
+    'auth/forgot-password' => 'MeForgotPasswordScreen',
+    'auth/login' => 'MeLoginScreen',
+    'auth/register' => 'MeRegisterScreen',
+    'auth/reset-password' => 'MeResetPasswordScreen',
+    'auth/two-factor-challenge' => 'MeTwoFactorChallengeScreen',
+    'auth/verify-email' => 'MeVerifyEmailScreen',
+    'profile/partials/delete-user' => 'MeDeleteAccountCard',
+    'profile/partials/passkeys' => 'MePasskeysCard',
+    'profile/partials/two-factor' => 'MeTwoFactorCard',
+    'profile/partials/update-password' => 'MeUpdatePasswordCard',
+    'profile/partials/update-profile-information' => 'MeProfileInformationCard',
+];
+
+/**
+ * @return array<int, string>
+ */
+function bladeNames(string $directory, string $skipPrefix = ''): array
 {
-    $root = __DIR__.'/../resources/views/components';
+    $root = __DIR__.'/../resources/views/'.$directory;
 
     $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS));
 
@@ -35,11 +66,11 @@ function bladeComponents(): array
 
         $name = str_replace([$root.'/', '.blade.php'], '', $file->getPathname());
 
-        // The Livewire variants are alternative renderings of components that
-        // already count, not components of their own.
-        if (! str_starts_with($name, 'livewire/')) {
-            $names[] = $name;
+        if ($skipPrefix !== '' && str_starts_with($name, $skipPrefix)) {
+            continue;
         }
+
+        $names[] = $name;
     }
 
     sort($names);
@@ -47,13 +78,73 @@ function bladeComponents(): array
     return $names;
 }
 
-function vueComponents(): array
+/**
+ * @return array<int, string>
+ */
+function bladeComponents(): array
+{
+    // The Livewire variants are alternative renderings of components that
+    // already count, not components of their own.
+    return bladeNames('components', 'livewire/');
+}
+
+/**
+ * @return array<int, string>
+ */
+function bladePages(): array
+{
+    return bladeNames('pages');
+}
+
+/**
+ * Exported names, grouped by the module they come from — screens live in their
+ * own module precisely so they can be counted separately.
+ *
+ * @return array<string, array<int, string>>
+ */
+function vueExports(): array
 {
     $source = (string) file_get_contents(__DIR__.'/../packages/vue/src/index.ts');
 
-    preg_match_all('/\b(Me[A-Za-z]+)\b/', $source, $matches);
+    preg_match_all('/export\s*\{(.+?)\}\s*from\s*\'\.\/([\w.-]+)\.js\'/s', $source, $matches, PREG_SET_ORDER);
 
-    $names = array_values(array_unique($matches[1]));
+    $modules = [];
+
+    foreach ($matches as $match) {
+        preg_match_all('/\b(Me[A-Za-z]+)\b/', $match[1], $names);
+
+        $module = $match[2];
+        $modules[$module] = array_values(array_unique(array_merge($modules[$module] ?? [], $names[1])));
+    }
+
+    return $modules;
+}
+
+/**
+ * @return array<int, string>
+ */
+function vueComponents(): array
+{
+    $names = [];
+
+    foreach (vueExports() as $module => $exports) {
+        if ($module !== 'screens') {
+            $names = array_merge($names, $exports);
+        }
+    }
+
+    $names = array_values(array_unique($names));
+    sort($names);
+
+    return $names;
+}
+
+/**
+ * @return array<int, string>
+ */
+function vueScreens(): array
+{
+    $names = vueExports()['screens'] ?? [];
     sort($names);
 
     return $names;
@@ -109,4 +200,32 @@ it('keeps the not-applicable list honest', function () {
     foreach (NOT_APPLICABLE_TO_VUE as $name) {
         expect(bladeComponents())->toContain($name);
     }
+
+    foreach (PAGES_NOT_APPLICABLE_TO_VUE as $name) {
+        expect(bladePages())->toContain($name);
+    }
+});
+
+it('exports a Vue screen for every published Blade screen', function () {
+    $missing = [];
+
+    foreach (bladePages() as $page) {
+        if (in_array($page, PAGES_NOT_APPLICABLE_TO_VUE, true)) {
+            continue;
+        }
+
+        $expected = PAGE_TO_VUE_SCREEN[$page] ?? null;
+
+        if ($expected === null || ! in_array($expected, vueScreens(), true)) {
+            $missing[$page] = $expected ?? '(unmapped)';
+        }
+    }
+
+    expect($missing)->toBe([]);
+});
+
+it('counts the screens too', function () {
+    $pages = count(bladePages()) - count(PAGES_NOT_APPLICABLE_TO_VUE);
+
+    expect(count(vueScreens()))->toBe($pages);
 });

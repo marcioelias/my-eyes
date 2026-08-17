@@ -1,6 +1,6 @@
 # Authentication screens
 
-Status: approved
+Status: implemented
 
 ## Purpose
 

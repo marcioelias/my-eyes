@@ -14,6 +14,8 @@ return [
         'remove' => 'Remover',
         'save' => 'Salvar',
         'dismiss' => 'Dispensar',
+        'copy' => 'Copiar',
+        'copied' => 'Copiado',
     ],
 
     'password' => [

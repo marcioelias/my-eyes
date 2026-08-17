@@ -530,12 +530,49 @@ themselves.
 ## Starter kit pages
 
 Login, register, forgot/reset password, verify email, confirm password,
-dashboard and profile — plus 401, 403, 404, 419, 429, 500 and 503.
+two-factor challenge, dashboard and profile — plus 401, 403, 404, 419, 429,
+500 and 503.
 
 They are **views only**: no routes, controllers or migrations. They target the
 conventional Laravel route names (`login`, `password.request`, `profile.edit`),
 so publish them over a Breeze or Fortify install and the wiring is already
 there. `my-eyes` deliberately does not ship an auth backend.
+
+Every screen exists twice: as a published Blade view, and as a Vue export that
+renders the same markup. The Vue screens emit their payload and let the
+application make the request:
+
+```vue
+<MeLoginScreen
+  :errors="errors"
+  :processing="form.processing"
+  can-register
+  @submit="payload => router.post('/login', payload)"
+/>
+```
+
+### Two-factor and passkeys
+
+The profile screen ships a card for each, both speaking to Fortify's own
+endpoints — `/user/two-factor-authentication`, `/user/passkeys` and friends.
+The two-factor card renders exactly one of Fortify's three states (off,
+awaiting confirmation, on), and the passkey card hides itself in a browser
+without WebAuthn.
+
+The WebAuthn ceremony lives in `@my-eyes/core`, with no dependency of its own:
+
+```js
+import { isPasskeySupported, registerPasskey, authenticateWithPasskey } from '@my-eyes/core'
+```
+
+In Blade there is nothing to import — a button carries `data-me-passkey="login"`,
+`"register"` or `"confirm"`, and `startMyEyes()` wires it.
+
+### Avatar
+
+The profile screen shows the avatar with an initials fallback and posts a plain
+file field named `avatar`. Storing, resizing and serving the image are the
+application's; this package ships no storage driver.
 
 ## Publishing
 

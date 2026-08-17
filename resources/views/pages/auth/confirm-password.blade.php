@@ -18,4 +18,14 @@
             {{ __('my-eyes::auth.confirm.submit') }}
         </x-me::button>
     </form>
+
+    <div class="me-stack" data-me-passkey-only hidden>
+        <p class="me-auth__separator">{{ __('my-eyes::auth.login.or') }}</p>
+
+        <x-me::button type="button" variant="secondary" block icon="key" data-me-passkey="confirm">
+            {{ __('my-eyes::auth.passkeys.confirm') }}
+        </x-me::button>
+
+        <p class="me-error" data-me-passkey-error hidden></p>
+    </div>
 </x-me::layouts.auth>
