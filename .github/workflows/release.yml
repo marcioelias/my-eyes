@@ -28,6 +28,10 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: npm
 
+      # Trusted publishing (OIDC) needs npm 11.5.1 or later. Pinned to 11 so the
+      # npm 12 install-time defaults arrive as a decision, not as a side effect.
+      - run: npm install -g npm@11
+
       - run: npm ci
 
       # The npm packages are versioned together, so one tag describes both.
@@ -54,22 +58,16 @@ jobs:
       # is the one the token has never published before. Failing on it leaves
       # nothing released, rather than half a release that cannot be undone.
       - name: Publish @my-eyes/react
-        run: npm publish --provenance --access public
+        run: npm publish --access public
         working-directory: packages/react
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @my-eyes/vue
-        run: npm publish --provenance --access public
+        run: npm publish --access public
         working-directory: packages/vue
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @my-eyes/core
-        run: npm publish --provenance --access public
+        run: npm publish --access public
         working-directory: packages/core
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Validate the Composer package
         run: composer validate --strict

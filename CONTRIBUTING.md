@@ -85,4 +85,9 @@ git tag v0.2.0 && git push origin v0.2.0
 ```
 
 The release workflow verifies the tag matches the package version, runs the full
-suite, publishes `@my-eyes/core` to npm and notifies Packagist.
+suite, publishes the three npm packages and notifies Packagist.
+
+npm publishing uses trusted publishing (OIDC): no npm token is stored. Each
+package (`@my-eyes/core`, `@my-eyes/vue`, `@my-eyes/react`) lists this
+repository and `release.yml` as its trusted publisher on npmjs.com, with direct
+`npm publish` allowed. Provenance is generated automatically.
