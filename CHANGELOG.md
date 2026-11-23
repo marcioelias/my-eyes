@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-11-23
+
 ### Fixed
 
 - Static analysis failed with the newest Larastan, which checks view names
@@ -252,7 +254,8 @@ All notable changes to this project are documented here. The format follows
   Composer refuses to install the earlier versions — supporting them would
   produce an unsolvable dependency set rather than a working install.
 
-[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/marcioelias/my-eyes/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/marcioelias/my-eyes/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/marcioelias/my-eyes/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/marcioelias/my-eyes/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/marcioelias/my-eyes/compare/v0.4.0...v0.5.0
