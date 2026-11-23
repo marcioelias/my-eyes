@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Column alignment never applied: the base `.me-table th, .me-table td` rule
+  outranked `.me-table__cell--end` and `--center`, so `->align('end')` and
+  `align: 'center'` were ignored in the header and the body, in every
+  renderer. Centred columns now also centre their sort control.
+- The collapsed sidebar rail scrolled sideways and clipped its submenu
+  flyouts: its body's `overflow-y: auto` made the horizontal overflow
+  scrollable too. The rail no longer clips.
+
 ## [0.6.0] - 2026-08-17
 
 ### Added
