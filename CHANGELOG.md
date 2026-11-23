@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Static analysis failed with the newest Larastan, which checks view names
+  against the application it boots: the package's own service provider is now
+  registered for Testbench (`testbench.yaml`), so `my-eyes::` views resolve.
+  This kept 0.6.1 from reaching npm; it is on Packagist only, with the same
+  code as 0.6.2.
+
 ## [0.6.1] - 2026-11-23
 
 ### Fixed
