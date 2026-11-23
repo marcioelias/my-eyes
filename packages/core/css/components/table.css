@@ -112,11 +112,16 @@
         padding: 0.5rem 0.75rem;
     }
 
-    .me-table__cell--end {
+    /*
+     * Scoped by .me-table on purpose: the base `.me-table th, .me-table td`
+     * rule sets `text-align: start` with a higher specificity than a lone
+     * class, and would otherwise win in both the header and the body.
+     */
+    .me-table .me-table__cell--end {
         text-align: end;
     }
 
-    .me-table__cell--center {
+    .me-table .me-table__cell--center {
         text-align: center;
     }
 
@@ -158,6 +163,10 @@
 
     .me-table__cell--end .me-table__sort {
         justify-content: flex-end;
+    }
+
+    .me-table__cell--center .me-table__sort {
+        justify-content: center;
     }
 
     .me-table__sort-icon {
