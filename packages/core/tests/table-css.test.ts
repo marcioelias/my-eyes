@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const css = readFileSync(resolve(__dirname, '../css/components/table.css'), 'utf8');
+const css = readFileSync(resolve(__dirname, '../css/components/table.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
 
 /**
  * Specificity as [ids, classes/attributes/pseudo-classes, elements], enough
@@ -21,7 +21,7 @@ function selectorsSetting(property: string, value: string): string[] {
 
     return rules
         .filter(([, , body]) => new RegExp(`${property}\\s*:\\s*${value}\\s*;`).test(body))
-        .flatMap(([, selectors]) => selectors.split(',').map((selector) => selector.replace(/\/\*[\s\S]*?\*\//g, '').trim()));
+        .flatMap(([, selectors]) => selectors.split(',').map((selector) => selector.trim()));
 }
 
 function outranks(a: [number, number, number], b: [number, number, number]): boolean {

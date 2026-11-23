@@ -257,6 +257,16 @@
         .me-shell[data-sidebar-collapsed='true'] .me-hide-collapsed {
             display: none;
         }
+
+        /*
+         * The rail holds only icons, so it never needs to scroll, and it must
+         * not clip: `overflow-y: auto` turns overflow-x into auto as well, so
+         * the submenu flyouts (nav.css) added a horizontal scrollbar while
+         * hidden and were cut off when shown.
+         */
+        .me-shell[data-sidebar-collapsed='true'] .me-sidebar__body {
+            overflow: visible;
+        }
     }
 
     @media (prefers-reduced-motion: reduce) {
